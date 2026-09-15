@@ -1,14 +1,14 @@
 @echo off
 cd /d "D:\MyFun\World\NoDreamLogic.com\my-website"
 
-echo === 正在添加文件 ===
+echo === In the update file. ===
 git add .
 
-echo === 正在提交 ===
-git commit -m "update %date% %time%"
+echo === Uploading. ===
+git commit -m "update site"
 
-echo === 正在推送 ===
+echo === Refreshing. ===
 git push
 
-echo === 完成 ===
+echo === Over. ===
 pause
