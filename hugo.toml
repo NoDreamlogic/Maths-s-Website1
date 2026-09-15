@@ -1,4 +1,4 @@
-baseURL = 'https://example.org/'
+baseURL = 'https://maths-s-website1.pages.dev/'
 locale = 'en-us'
 title = '断续的梦'
 theme = "yinyang"
@@ -6,7 +6,7 @@ DefaultContentLanguage = "cn"
 
 [taxonomies]
   tag = "tags"
-  
+
 [author]
   name = "NoDreamlogic"
 
