@@ -1,0 +1,15 @@
+baseURL = 'https://example.org/'
+locale = 'en-us'
+title = '断续的梦'
+theme = "yinyang"
+DefaultContentLanguage = "cn"
+
+[taxonomies]
+  tag = "tags"
+  
+[author]
+  name = "NoDreamlogic"
+
+[params]
+headTitle = "NoDreamlogic"
+mainSections = ["posts"]
