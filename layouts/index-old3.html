@@ -267,31 +267,16 @@
                 font-weight: 600;
             }
 
-            /* ===== 并排容器 ===== */
-            #feature-row {
-                display: flex;
-                gap: 20px;
-                margin: 40px 0;
-                flex-wrap: wrap;
-                align-items: stretch;
-            }
-            #feature-row > * {
-                flex: 1;
-                min-width: 260px;
-            }
-
             /* ===== 占卜 ===== */
             #oracle-section {
-                margin: 0;
+                margin: 40px auto;
+                max-width: 500px;
                 padding: 28px 32px;
                 background: rgb(32, 32, 96);
                 border: 1px solid #eee;
                 border-radius: 12px;
                 text-align: center;
                 transition: border-color 0.3s, box-shadow 0.3s;
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
             }
             #oracle-section:hover {
                 border-color: #ddd;
@@ -319,7 +304,6 @@
                 cursor: pointer;
                 font-family: inherit;
                 transition: all 0.2s;
-                align-self: center;
             }
             #oracle-trigger:hover {
                 background: #333;
@@ -470,101 +454,38 @@
                     gap: 6px;
                 }
             }
-
-            /* ===== 角色卡片 ===== */
             #character-card {
-                margin: 0;
+                margin: 30px auto;
+                max-width: 500px;
                 padding: 28px 32px;
                 background: #fafafa;
                 border: 1px solid #eee;
                 border-radius: 12px;
                 text-align: center;
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-            }
-            #card-title {
-                font-size: 1.1em;
-                color: #333;
-                margin: 0 0 16px;
-                letter-spacing: 0.05em;
             }
             #card-name {
-                font-size: 0.95em;
+                font-size: 1.2em;
                 font-weight: 600;
                 color: #222;
-                margin-bottom: 8px;
-                text-align: left;
-                width: 100%;
+                margin-bottom: 12px;
             }
             #card-skill {
                 font-size: 0.95em;
                 line-height: 1.7;
                 color: #666;
             }
-            /* ===== 友情链接 ===== */
-            #links-card {
-                margin: 0;
-                padding: 28px 32px;
-                background: rgb(239,228,17);
-                border: 1px solid #eee;
-                border-radius: 12px;
-                text-align: center;
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-            }
-            #links-title {
-                font-size: 1.1em;
-                color: #333;
-                margin: 0 0 20px;
-                letter-spacing: 0.05em;
-            }
-            #links-wall {
-                display: flex;
-                flex-wrap: wrap;
-                gap: 10px;
-                justify-content: center;
-                align-items: center;
-            }
-            #links-wall a {
-                display: inline-block;
-                line-height: 0;
-            }
-            #links-wall img {
-                height: 31px;
-                width: auto;
-                border: 1px solid #eee;
-                border-radius: 4px;
-                transition: transform 0.2s, border-color 0.2s;
-            }
-            #links-wall a:hover img {
-                transform: translateY(-2px);
-                border-color: #ccc;
-            }
         </style>
 
-        <!-- 并排功能区 -->
-        <div id="feature-row">
-            <!-- 占卜 -->
-            <div id="oracle-section">
-                <h2 id="oracle-title">虚拟抽牌</h2>
-                <p id="oracle-desc">选择你观测的视角。</p>
-                <button id="oracle-trigger">抽牌</button>
-            </div>
+        <!-- 占卜区域 -->
+        <div id="oracle-section">
+            <h2 id="oracle-title">虚拟抽牌</h2>
+            <p id="oracle-desc">选择你观测的视角。</p>
+            <button id="oracle-trigger">抽牌</button>
+        </div>
 
-            <!-- 角色卡片 -->
-            <div id="character-card">
-                <h2 id="card-title">抽取特性！</h2>
-                <div id="card-name">加载中……</div>
-                <div id="card-skill"></div>
-            </div>
-
-            <!-- 友情链接 -->
-            <div id="links-card">
-                <h2 id="links-title">友情链接</h2>
-                <div id="links-wall"></div>
-            </div>
+        <div id="character-card">
+            <div id="card-name">加载中……</div>
+            <div id="card-skill"></div>
         </div>
 
         <div id="oracle-modal">
@@ -786,8 +707,6 @@
                     closeOracle();
                 }
             });
-
-            /* ===== 角色卡片 ===== */
             let characterData = [];
 
             fetch('/data/tags.json')
@@ -797,10 +716,10 @@
                     showRandomCard();
                 })
                 .catch(err => console.error('角色数据加载失败', err));
-
+            
             function showRandomCard() {
                 if (characterData.length === 0) return;
-
+            
                 const item = characterData[Math.floor(Math.random() * characterData.length)];
                 const names = item.names || [];
                 const name = names.length > 0
@@ -812,19 +731,6 @@
                 if (nameEl) nameEl.textContent = name;
                 if (skillEl) skillEl.textContent = item.tag;
             }
-            /* ===== 友情链接 ===== */
-            fetch('/data/links.json')
-                .then(res => res.json())
-                .then(data => {
-                    const wall = document.getElementById('links-wall');
-                    if (!wall) return;
-                    wall.innerHTML = data.map(link => `
-                        <a href="${link.url}" target="_blank" rel="noopener" title="${escapeHtml(link.name)}">
-                            <img src="${link.banner}" alt="${escapeHtml(link.name)}">
-                        </a>
-                    `).join('');
-                })
-                .catch(err => console.error('连接失败。', err));
         </script>
 
         {{ if false }}
