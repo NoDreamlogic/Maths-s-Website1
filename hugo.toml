@@ -5,11 +5,15 @@ theme = "yinyang"
 DefaultContentLanguage = "cn"
 
 [taxonomies]
-  tag = "tags"
+    tag = "tags"
 
 [author]
-  name = "NoDreamlogic"
+    name = "NoDreamlogic"
 
 [params]
-headTitle = "NoDreamlogic"
-mainSections = ["posts"]
+    headTitle = "NoDreamlogic"
+    mainSections = ["posts"]
+
+[markup]
+    [markup.goldmark.renderer]
+        unsafe = true
