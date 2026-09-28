@@ -15,7 +15,7 @@
     "L": {
         "id": "l",
         "name": "追击",
-        "description": "出牌完成后，向队列中额外插入一张追击，此牌的伤害值为本回合攻击次数*3。",
+        "description": "开始行动前，向行动队列中额外插入一张追击，此牌的伤害值为本回合攻击次数*3。",
         "maxHp": 80,
         "passive": {
             "type": "appendSpecialAttack",
