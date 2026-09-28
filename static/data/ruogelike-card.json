@@ -1,0 +1,51 @@
+{
+    "strike": {
+        "id": "strike",
+        "name": "攻击",
+        "description": "造成 6 点伤害。",
+        "tags": ["attack"],
+        "effects": [{ "type": "damage", "value": 6 }]
+    },
+    "defend": {
+        "id": "defend",
+        "name": "防御",
+        "description": "获得 5 点格挡。",
+        "tags": ["buff"],
+        "effects": [{ "type": "block", "value": 5 }]
+    },
+    "strike_one": {
+        "id": "strike_one",
+        "name": "连击",
+        "description": "造成 5 点伤害，1 连击。",
+        "tags": ["attack", "combo"],
+        "effects": [{ "type": "damage", "value": 5, "times": 1 }]
+    },
+    "strike_two": {
+        "id": "strike_two",
+        "name": "二连击",
+        "description": "造成 4 点伤害，2 连击。",
+        "tags": ["attack", "combo"],
+        "effects": [{ "type": "damage", "value": 4, "times": 2 }]
+    },
+    "chase_sharp": {
+        "id": "chase_sharp",
+        "name": "追击·锋利",
+        "description": "使追击每次攻击额外造成 2 点伤害。",
+        "tags": ["buff", "chase"],
+        "effects": [{ "type": "buffSpecialAttack", "perAttackDelta": 2 }]
+    },
+    "chase_pierce": {
+        "id": "chase_pierce",
+        "name": "追击·刻骨",
+        "description": "使追击至少造成 1 点真实伤害。",
+        "tags": ["buff", "chase"],
+        "effects": [{ "type": "buffSpecialAttack", "minDamageSet": 1 }]
+    },
+    "chase_density": {
+        "id": "chase_density",
+        "name": "追击·密度",
+        "description": "使追击额外计入 2 次攻击。",
+        "tags": ["buff", "chase"],
+        "effects": [{ "type": "buffSpecialAttack", "bonusAttacksDelta": 2 }]
+    }
+}
