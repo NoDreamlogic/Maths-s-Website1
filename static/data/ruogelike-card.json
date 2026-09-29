@@ -27,6 +27,13 @@
         "tags": ["attack", "combo"],
         "effects": [{ "type": "damage", "value": 4, "times": 2 }]
     },
+    "strike_blood": {
+        "id": "strike_blood",
+        "name": "反攻",
+        "description": "造成 5+40%已损体力值 点伤害。",
+        "tags": ["attack"],
+    "effects": [{ "type": "lostHpDamage", "flat": 5, "lostHpPercent": 0.4 }]
+    },
     "chase_sharp": {
         "id": "chase_sharp",
         "name": "追击·锋利",

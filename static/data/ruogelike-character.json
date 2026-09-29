@@ -2,39 +2,40 @@
     "W": {
         "id": "w",
         "name": "燃血",
-        "description": "攻击后，损失当前生命值的 20%，并回复等同于真实伤害的生命值。",
+        "description": "使用攻击类技能后，损失20%当前生命值，并回复等同于100%造成体力伤害的生命值。",
         "maxHp": 80,
-        "passive": {
-            "type": "lifesteal",
-            "costPercent": 0.2
-        },
+        "passive": { "type": "lifesteal", "costPercent": 0.2 },
+        "deck": ["strike", "strike", "strike", "strike_one", "strike_one",
+                 "defend", "defend", "defend", "defend",
+                 "strike_two","strike_blood"]
+    },
+    "L": {
+        "id": "l",
+        "name": "追刃",
+        "description": "开始行动前，在行动序列末尾添加一张「追击」。",
+        "maxHp": 80,
+        "passive": { "type": "appendSpecialAttack", "damagePerAttack": 3 },
+        "deck": ["strike", "strike", "strike", "strike_one", "strike_one",
+                 "defend", "defend", "defend", "defend",
+                 "strike_two", "chase_sharp", "chase_pierce", "chase_density"]
+    },
+    "K": {
+        "id": "Wind",
+        "name": "寻风",
+        "description": "使用的攻击牌获得连击次数+1。",
+        "maxHp": 80,
+        "passive": { "type": "extraDamageRepeat", "value": 1 },
         "deck": ["strike", "strike", "strike", "strike_one", "strike_one",
                  "defend", "defend", "defend", "defend",
                  "strike_two"]
     },
-    "L": {
-        "id": "l",
-        "name": "追击",
-        "description": "开始行动前，向行动队列中额外插入一张追击，此牌的伤害值为本回合攻击次数*3。",
+    "Snowy": {
+        "id": "Snowy",
+        "name": "冷冻",
+        "description": "造成体力伤害时，使目标下回合行动序列最大长度 -1（不叠加）。",
         "maxHp": 80,
-        "passive": {
-            "type": "appendSpecialAttack",
-            "damagePerAttack": 3
-        },
+        "passive": { "type": "reduceEnemyQueueLimit", "value": 1 },
         "deck": ["strike", "strike", "strike", "strike_one", "strike_one",
-                 "defend", "defend", "defend", "defend",
-                 "double_strike", "chase_sharp", "chase_pierce", "chase_density"]
-    },
-    "K": {
-        "id": "k",
-        "name": "逐风",
-        "description": "牌的连击次数+1。",
-        "maxHp": 80,
-        "passive": {
-            "type": "extraDamageRepeat",
-            "value": 1
-        },
-        "deck": ["strike", "strike", "strike_one", "strike_one", "strike_one",
                  "defend", "defend", "defend", "defend",
                  "strike_two"]
     }

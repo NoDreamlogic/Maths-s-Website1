@@ -29,6 +29,26 @@ title: "迷你游戏"
     }
     .spire-side .hp { color: #333; }
     .spire-side .block { color: #1976d2; }
+    .spire-side .slot {
+        display: inline-block;
+        padding: 3px 8px;
+        margin: 3px 3px 3px 0;
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 0.85em;
+        color: #555;
+    }
+    .spire-side .slot.attack {
+        border-color: #e0a0a0;
+        color: #a04040;
+        background: #fff8f8;
+    }
+    .spire-side .slot.buff {
+        border-color: #a0c0e0;
+        color: #2060a0;
+        background: #f5faff;
+    }
     #spire-queue {
         margin: 16px 0;
         padding: 12px;
@@ -144,71 +164,161 @@ title: "迷你游戏"
         line-height: 1.6;
     }
 
-    #spire-charselect {
+    /* 5 栏选择界面 */
+    #spire-select {
         display: none;
         position: fixed;
         top: 0; left: 0; right: 0; bottom: 0;
-        background: rgba(255,255,255,0.96);
+        background: #fafafa;
         z-index: 100;
-        padding: 60px 20px;
-        text-align: center;
-        flex-direction: column;
+        padding: 30px 20px;
+        box-sizing: border-box;
         align-items: center;
         justify-content: center;
     }
-    #spire-charselect.active { display: flex; }
-    #spire-charselect h2 {
-        margin: 0 0 24px;
-        font-weight: 600;
-        color: #222;
-    }
-    #spire-charoptions {
+    #spire-select.active { display: flex; }
+
+    .spire-select-panel {
         display: flex;
-        gap: 16px;
-        justify-content: center;
-        flex-wrap: wrap;
-        max-width: 800px;
+        width: 100%;
+        max-width: 1100px;
+        height: 80vh;
+        max-height: 600px;
+        gap: 12px;
     }
-    .char-option {
-        width: 220px;
-        padding: 20px;
+
+    .spire-col {
         background: #fff;
-        border: 2px solid #ddd;
+        border: 1px solid #e0e0e0;
         border-radius: 10px;
-        cursor: pointer;
-        transition: all 0.2s;
-        text-align: left;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
     }
-    .char-option:hover {
-        border-color: #333;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+
+    .spire-col-info { flex: 1.4; }
+    .spire-col-wheel { flex: 1; padding: 8px; }
+    .spire-col-action {
+        flex: 0.8;
+        align-items: center;
+        justify-content: center;
+        padding: 12px;
     }
-    .char-option .char-name {
-        font-size: 1.2em;
-        font-weight: 600;
-        margin-bottom: 8px;
-        color: #222;
-    }
-    .char-option .char-desc {
+
+    .spire-col-title {
+        margin: 0 0 12px;
         font-size: 0.85em;
-        color: #666;
-        line-height: 1.5;
-        min-height: 5em;
-    }
-    .char-option .char-hp {
-        margin-top: 10px;
-        font-size: 0.8em;
         color: #999;
+        letter-spacing: 0.1em;
+        font-weight: 500;
+    }
+
+    .spire-name {
+        font-size: 1.3em;
+        font-weight: 600;
+        color: #222;
+        margin-bottom: 12px;
+    }
+
+    .spire-desc {
+        font-size: 0.9em;
+        color: #555;
+        line-height: 1.6;
+        flex: 1;
+    }
+
+    .spire-stat {
+        font-size: 0.85em;
+        color: #999;
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid #eee;
+    }
+
+    .spire-wheel {
+        flex: 1;
+        overflow-y: auto;
+        min-height: 0;
+        scrollbar-width: thin;
+    }
+
+    .spire-wheel-item {
+        padding: 10px 14px;
+        margin: 4px 0;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background 0.15s, color 0.15s;
+        color: #333;
+        user-select: none;
+        font-size: 0.95em;
+    }
+    .spire-wheel-item:hover {
+        background: #f0f0f0;
+    }
+    .spire-wheel-item.selected {
+        background: #333;
+        color: #fff;
+        font-weight: 600;
+    }
+
+    #start-battle-btn {
+        padding: 14px 20px;
+        border-radius: 8px;
+        border: 1px solid #333;
+        background: #333;
+        color: #fff;
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 1em;
+        width: 100%;
+        transition: opacity 0.15s;
+    }
+    #start-battle-btn:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+    }
+
+    @media (max-width: 820px) {
+        .spire-select-panel {
+            flex-direction: column;
+            height: auto;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .spire-col { flex: none; }
+        .spire-col-wheel { height: 180px; }
+        .spire-col-action { padding: 16px; }
     }
 </style>
 
 <div id="spire-page">
 <h1>迷你游戏</h1>
 
-<div id="spire-charselect">
-    <h2>选择角色</h2>
-    <div id="spire-charoptions"></div>
+<div id="spire-select">
+    <div class="spire-select-panel">
+        <div class="spire-col spire-col-info">
+            <h3 class="spire-col-title">我方</h3>
+            <div class="spire-name" id="char-name-display">—</div>
+            <div class="spire-desc" id="char-desc-display">请从右侧列表选择角色</div>
+            <div class="spire-stat" id="char-stat-display"></div>
+        </div>
+        <div class="spire-col spire-col-wheel">
+            <div class="spire-wheel" id="char-wheel"></div>
+        </div>
+        <div class="spire-col spire-col-action">
+            <button id="start-battle-btn" disabled>开始战斗</button>
+        </div>
+        <div class="spire-col spire-col-wheel">
+            <div class="spire-wheel" id="enemy-wheel"></div>
+        </div>
+        <div class="spire-col spire-col-info">
+            <h3 class="spire-col-title">敌方</h3>
+            <div class="spire-name" id="enemy-name-display">—</div>
+            <div class="spire-desc" id="enemy-desc-display">请从左侧列表选择敌人</div>
+            <div class="spire-stat" id="enemy-stat-display"></div>
+        </div>
+    </div>
 </div>
 
 <div id="spire-status">
@@ -219,10 +329,10 @@ title: "迷你游戏"
 <div>出牌上限：<span id="queue-limit">4</span></div>
 </div>
 <div class="spire-side">
-<h3>敌人</h3>
+<h3>敌人 · <span id="enemy-name">?</span></h3>
 <div class="hp">HP：<span id="enemy-hp">50</span> / <span id="enemy-maxhp">50</span></div>
 <div class="block">格挡：<span id="enemy-block">0</span></div>
-<div>意图：<span id="enemy-intent">未知</span></div>
+<div>行动（上限 <span id="enemy-queue-limit">2</span>）：<span id="enemy-queue-display">（无）</span></div>
 </div>
 </div>
 
@@ -244,8 +354,12 @@ title: "迷你游戏"
    ============================================ */
 let CARD_LIBRARY = {};
 let CHARACTER_LIBRARY = {};
+let ENEMY_LIBRARY = {};
 let state = null;
 let nextCardUid = 1;
+
+let selectedCharKey = null;
+let selectedEnemyKey = null;
 
 /* ============================================
    工具
@@ -278,13 +392,11 @@ function makeCard(id) {
     return card;
 }
 
-/* 追击牌：一次性消耗品，不进弃牌堆。
-   伤害公式在结算时算（见 specialDamage 处理器）。 */
 function makeChaseCard() {
     return {
         id: 'chase',
         name: '追击',
-        description: '造成 本回合攻击次数 × 倍率 的伤害（结算时确定）。',
+        description: '造成 本回合攻击次数 × 倍率 的伤害。',
         isSpecial: true,
         effects: [{ type: 'specialDamage' }],
         uid: nextCardUid++
@@ -292,11 +404,78 @@ function makeChaseCard() {
 }
 
 /* ============================================
+   敌人意图池 / 队列填充
+   ============================================ */
+function rollEnemyIntentFromPool(pool) {
+    const total = pool.reduce((s, e) => s + (e.weight || 1), 0);
+    let r = Math.random() * total;
+    for (const entry of pool) {
+        r -= (entry.weight || 1);
+        if (r <= 0) {
+            const intent = { type: entry.type, value: entry.value };
+            if (entry.times) intent.times = entry.times;
+            return intent;
+        }
+    }
+    return { type: 'attack', value: 5 };
+}
+
+function fillEnemyQueue(limit) {
+    state.enemy.queue = [];
+    const pool = state.enemy.intentPool;
+    for (let i = 0; i < limit; i++) {
+        let intent = rollEnemyIntentFromPool(pool);
+        intent = applyEnemyPassiveToIntent(intent);
+        state.enemy.queue.push(intent);
+    }
+}
+
+function applyEnemyPassiveToIntent(intent) {
+    const passive = state.enemy.passive;
+    if (!passive) return intent;
+
+    if (passive.type === 'fire_growth' && intent.type === 'attack') {
+        intent.value += state.enemy.attackGrowthStacks * (passive.value || 0);
+    }
+
+    if (passive.type === 'counter_strike' && intent.type === 'attack') {
+        const bonus = Math.floor(state.enemy.lastPlayerDamageTaken * (passive.ratio || 0));
+        intent.value += bonus;
+    }
+
+    if (passive.type === 'barrage' && intent.type === 'attack') {
+        intent.times = (intent.times || 1) + 1;
+    }
+
+    return intent;
+}
+
+function getDamageCapRemaining() {
+    const passive = state.enemy?.passive;
+    if (passive?.type !== 'damage_cap') return Infinity;
+    const cap = Math.floor(state.enemy.maxHp * passive.percent);
+    return Math.max(0, cap - state.enemy.damageTakenThisTurn);
+}
+
+/* ============================================
+   HP 伤害钩子
+   ============================================ */
+function onPlayerDealtHpDamage(state, amount) {
+    if (amount <= 0) return;
+    const charPassive = state.character?.passive;
+    if (charPassive?.type === 'reduceEnemyQueueLimit') {
+        if (state.enemy.nextQueueLimitPenalty < charPassive.value) {
+            state.enemy.nextQueueLimitPenalty = charPassive.value;
+            log(`[${state.character.name}] 敌人下回合行动上限 -${charPassive.value}。`);
+        }
+    }
+}
+
+/* ============================================
    效果处理器
    ============================================ */
 const EFFECT_HANDLERS = {
 
-    /* 普通伤害。times 是基础段数，K 的连击加成会 +1 段。 */
     damage(state, effect) {
         const baseDmg = effect.value || 0;
         const baseTimes = effect.times || 1;
@@ -312,8 +491,10 @@ const EFFECT_HANDLERS = {
             if (state.enemy.hp <= 0) break;
             const absorbed = Math.min(state.enemy.block, baseDmg);
             state.enemy.block -= absorbed;
-            const real = baseDmg - absorbed;
+            let real = baseDmg - absorbed;
+            real = Math.min(real, getDamageCapRemaining());
             state.enemy.hp = Math.max(0, state.enemy.hp - real);
+            state.enemy.damageTakenThisTurn += real;
             totalReal += real;
             totalAbsorbed += absorbed;
         }
@@ -324,30 +505,65 @@ const EFFECT_HANDLERS = {
         } else {
             log(`造成 ${totalReal} 点伤害（格挡吸收 ${totalAbsorbed}）。`);
         }
+
+        onPlayerDealtHpDamage(state, totalReal);
     },
 
-    /* 追击伤害：结算时才算。读 specialAttackConfig。 */
+    lostHpDamage(state, effect) {
+        const flat = effect.flat || 0;
+        const pct = effect.lostHpPercent || 0;
+        const lostHp = state.player.maxHp - state.player.hp;
+        const variable = Math.floor(lostHp * pct);
+        const baseDmg = flat + variable;
+        const baseTimes = effect.times || 1;
+
+        const isK = state.character?.passive?.type === 'extraDamageRepeat';
+        const isCombo = state.resolvingCard?.tags?.includes('combo');
+        const bonus = (isK && isCombo) ? (state.character.passive.value || 0) : 0;
+        const times = baseTimes + bonus;
+
+        let totalReal = 0;
+        let totalAbsorbed = 0;
+        for (let r = 0; r < times; r++) {
+            if (state.enemy.hp <= 0) break;
+            const absorbed = Math.min(state.enemy.block, baseDmg);
+            state.enemy.block -= absorbed;
+            let real = baseDmg - absorbed;
+            real = Math.min(real, getDamageCapRemaining());
+            state.enemy.hp = Math.max(0, state.enemy.hp - real);
+            state.enemy.damageTakenThisTurn += real;
+            totalReal += real;
+            totalAbsorbed += absorbed;
+        }
+        state.currentCardRealDamage += totalReal;
+
+        log(`造成 ${baseDmg} 点伤害` +
+            `（固定 ${flat} + 已损失 ${lostHp} × ${Math.round(pct * 100)}% = ${variable}，` +
+            `真实 ${totalReal}，吸收 ${totalAbsorbed}）。`);
+
+        onPlayerDealtHpDamage(state, totalReal);
+    },
+
     specialDamage(state, effect) {
         const cfg = state.specialAttackConfig;
         const effectiveAttacks = state.attacksThisTurn + cfg.bonusAttacks;
         const dmg = effectiveAttacks * cfg.perAttack + cfg.flatBonus;
 
-        // 常规伤害（可被格挡）
         const absorbed = Math.min(state.enemy.block, dmg);
         state.enemy.block -= absorbed;
         let real = dmg - absorbed;
 
-        // 保底真伤
         let guaranteed = 0;
         if (real < cfg.minDamage) {
             guaranteed = cfg.minDamage - real;
             real += guaranteed;
         }
 
+        real = Math.min(real, getDamageCapRemaining());
         state.enemy.hp = Math.max(0, state.enemy.hp - real);
+        state.enemy.damageTakenThisTurn += real;
         state.currentCardRealDamage += real;
 
-        // 日志
         let formula = `${state.attacksThisTurn} 次攻击`;
         if (cfg.bonusAttacks) formula += ` + 额外 ${cfg.bonusAttacks}`;
         formula += ` × ${cfg.perAttack}`;
@@ -360,7 +576,8 @@ const EFFECT_HANDLERS = {
             log(`追击造成 ${real} 点伤害（${formula}，吸收 ${absorbed}）。`);
         }
 
-        // 附加效果
+        onPlayerDealtHpDamage(state, real);
+
         for (const extra of cfg.extraEffects) {
             const handler = EFFECT_HANDLERS[extra.type];
             if (handler) handler(state, extra);
@@ -387,7 +604,6 @@ const EFFECT_HANDLERS = {
         log(`抽了 ${n} 张牌。`);
     },
 
-    /* 修改本回合追击的配置 */
     buffSpecialAttack(state, effect) {
         const cfg = state.specialAttackConfig;
         if (effect.perAttackDelta) cfg.perAttack += effect.perAttackDelta;
@@ -404,7 +620,43 @@ const EFFECT_HANDLERS = {
 };
 
 /* ============================================
-   抽牌 / 意图
+   敌人被动处理表
+   ============================================ */
+const ENEMY_PASSIVE_HANDLERS = {
+    regen: {
+        onTurnStart(state, passive) {
+            const before = state.enemy.hp;
+            state.enemy.hp = Math.min(state.enemy.maxHp, state.enemy.hp + passive.value);
+            const gain = state.enemy.hp - before;
+            if (gain > 0) log(`[${state.enemyDef.name}] 再生，回复 ${gain} HP。`);
+        }
+    },
+    thorns: {
+        onPlayerAttackResolved(state, passive, realDamage) {
+            if (realDamage <= 0) return;
+            state.player.hp = Math.max(0, state.player.hp - passive.value);
+            log(`[${state.enemyDef.name}] 荆棘，反弹 ${passive.value} 点伤害。`);
+        }
+    },
+    shield_up: {
+        onTurnStart(state, passive) {
+            state.enemy.block += passive.value;
+            log(`[${state.enemyDef.name}] 获得 ${passive.value} 点格挡。`);
+        }
+    }
+};
+
+function runEnemyPassive(hook, ...args) {
+    const passive = state.enemy?.passive;
+    if (!passive) return;
+    const handler = ENEMY_PASSIVE_HANDLERS[passive.type];
+    if (handler && handler[hook]) {
+        handler[hook](state, passive, ...args);
+    }
+}
+
+/* ============================================
+   抽牌
    ============================================ */
 function drawHand(n) {
     for (let i = 0; i < n; i++) {
@@ -417,49 +669,114 @@ function drawHand(n) {
     }
 }
 
-function rollEnemyIntent() {
-    const r = Math.random();
-    if (r < 0.6) {
-        state.enemy.intent = { type: 'attack', value: 8 };
-    } else if (r < 0.85) {
-        state.enemy.intent = { type: 'attack', value: 5 };
-    } else {
-        state.enemy.intent = { type: 'buff', value: 5 };
-    }
-}
-
 /* ============================================
-   角色选择
+   5 栏选择界面
    ============================================ */
 function showCharacterSelect() {
-    const container = document.getElementById('spire-charoptions');
+    state = null;
+    document.getElementById('spire-select').classList.add('active');
+
+    buildCharWheel();
+    buildEnemyWheel();
+
+    const charKeys = Object.keys(CHARACTER_LIBRARY);
+    if (!selectedCharKey && charKeys.length > 0) selectedCharKey = charKeys[0];
+    if (selectedCharKey) selectCharacter(selectedCharKey);
+
+    const enemyKeys = Object.keys(ENEMY_LIBRARY);
+    if (!selectedEnemyKey && enemyKeys.length > 0) selectedEnemyKey = enemyKeys[0];
+    if (selectedEnemyKey) selectEnemy(selectedEnemyKey);
+}
+
+function buildCharWheel() {
+    const container = document.getElementById('char-wheel');
     container.innerHTML = '';
     Object.keys(CHARACTER_LIBRARY).forEach(key => {
         const c = CHARACTER_LIBRARY[key];
         const el = document.createElement('div');
-        el.className = 'char-option';
-        el.innerHTML = `
-            <div class="char-name">${c.name}</div>
-            <div class="char-desc">${c.description}</div>
-            <div class="char-hp">HP ${c.maxHp}</div>
-        `;
-        el.addEventListener('click', () => newGame(key));
+        el.className = 'spire-wheel-item';
+        el.dataset.key = key;
+        el.textContent = c.name;
+        el.addEventListener('click', () => selectCharacter(key));
         container.appendChild(el);
     });
-    document.getElementById('spire-charselect').classList.add('active');
+}
+
+function buildEnemyWheel() {
+    const container = document.getElementById('enemy-wheel');
+    container.innerHTML = '';
+    Object.keys(ENEMY_LIBRARY).forEach(key => {
+        const e = ENEMY_LIBRARY[key];
+        const el = document.createElement('div');
+        el.className = 'spire-wheel-item';
+        el.dataset.key = key;
+        el.textContent = e.name;
+        el.addEventListener('click', () => selectEnemy(key));
+        container.appendChild(el);
+    });
+}
+
+function selectCharacter(key) {
+    selectedCharKey = key;
+    document.querySelectorAll('#char-wheel .spire-wheel-item').forEach(el => {
+        el.classList.toggle('selected', el.dataset.key === key);
+    });
+    const c = CHARACTER_LIBRARY[key];
+    document.getElementById('char-name-display').textContent = c.name;
+    document.getElementById('char-desc-display').textContent = c.description;
+    document.getElementById('char-stat-display').textContent = `HP ${c.maxHp}`;
+    updateStartButton();
+}
+
+function selectEnemy(key) {
+    selectedEnemyKey = key;
+    document.querySelectorAll('#enemy-wheel .spire-wheel-item').forEach(el => {
+        el.classList.toggle('selected', el.dataset.key === key);
+    });
+    const e = ENEMY_LIBRARY[key];
+    document.getElementById('enemy-name-display').textContent = e.name;
+    document.getElementById('enemy-desc-display').textContent = e.description;
+    document.getElementById('enemy-stat-display').textContent =
+        `HP ${e.maxHp} · 行动上限 ${e.queueLimit}`;
+    updateStartButton();
+}
+
+function updateStartButton() {
+    const btn = document.getElementById('start-battle-btn');
+    btn.disabled = !(selectedCharKey && selectedEnemyKey);
 }
 
 /* ============================================
-   新游戏
+   开始战斗
    ============================================ */
-function newGame(characterKey) {
+function startBattle(characterKey, enemyKey) {
     const characterDef = CHARACTER_LIBRARY[characterKey];
-    if (!characterDef) return;
+    const enemyDef = ENEMY_LIBRARY[enemyKey];
+    if (!characterDef || !enemyDef) return;
 
     state = {
         character: characterDef,
-        player: { hp: characterDef.maxHp, maxHp: characterDef.maxHp, block: 0 },
-        enemy: { hp: 50, maxHp: 50, block: 0, intent: null },
+        characterKey: characterKey,
+        enemyDef: enemyDef,
+        enemyKey: enemyKey,
+        player: {
+            hp: characterDef.maxHp,
+            maxHp: characterDef.maxHp,
+            block: 0,
+            queueLimitPenalty: 0
+        },
+        enemy: {
+            hp: enemyDef.maxHp, maxHp: enemyDef.maxHp, block: 0,
+            baseQueueLimit: enemyDef.queueLimit,
+            queueLimit: enemyDef.queueLimit,
+            nextQueueLimitPenalty: 0,
+            intentPool: enemyDef.intentPool,
+            passive: enemyDef.passive,
+            attackGrowthStacks: 0,
+            lastPlayerDamageTaken: 0,
+            damageTakenThisTurn: 0,
+            queue: []
+        },
         drawPile: [],
         hand: [],
         discardPile: [],
@@ -482,12 +799,13 @@ function newGame(characterKey) {
         log: []
     };
 
+    fillEnemyQueue(state.enemy.baseQueueLimit);
+
     const deck = characterDef.deck.map(id => makeCard(id));
     state.drawPile = shuffle(deck);
     drawHand(5);
-    rollEnemyIntent();
 
-    document.getElementById('spire-charselect').classList.remove('active');
+    document.getElementById('spire-select').classList.remove('active');
     render();
 }
 
@@ -507,7 +825,7 @@ function playCardFromHand(index) {
 }
 
 /* ============================================
-   结算核心（异步）
+   玩家队列结算（异步）
    ============================================ */
 async function resolveQueueAsync() {
     while (state.queue.length > 0) {
@@ -517,10 +835,10 @@ async function resolveQueueAsync() {
         render();
         await sleep(450);
 
-        log(`打出「${card.name}」。`);
+        log(`你使用了「${card.name}」。`);
         state.currentCardRealDamage = 0;
         const isAttackCard = card.effects.some(e =>
-            e.type === 'damage' || e.type === 'specialDamage');
+            e.type === 'damage' || e.type === 'specialDamage' || e.type === 'lostHpDamage');
 
         for (const effect of card.effects) {
             const handler = EFFECT_HANDLERS[effect.type];
@@ -531,16 +849,17 @@ async function resolveQueueAsync() {
         if (isAttackCard) {
             state.attacksThisTurn++;
 
-            // W 的吸血被动
             if (state.character?.passive?.type === 'lifesteal') {
                 const cost = Math.floor(state.player.hp * state.character.passive.costPercent);
                 const heal = state.currentCardRealDamage;
                 state.player.hp = Math.max(0, state.player.hp - cost + heal);
                 log(`[W] 消耗 ${cost} HP，回复 ${heal} HP。`);
             }
+            if (state.currentCardRealDamage > 0) {
+                runEnemyPassive('onPlayerAttackResolved', state.currentCardRealDamage);
+            }
         }
 
-        // 移出队列。追击牌是消耗品，不进弃牌堆。
         state.queue.shift();
         if (!card.isSpecial) {
             state.discardPile.push(card);
@@ -567,27 +886,71 @@ async function resolveQueueAsync() {
 }
 
 /* ============================================
-   敌人行动（异步）
+   敌人回合（异步）
    ============================================ */
-async function enemyActAsync() {
+async function enemyActAllAsync() {
     state.enemy.block = 0;
-    const intent = state.enemy.intent;
-    if (!intent) return;
+    runEnemyPassive('onTurnStart');
+    render();
+    await sleep(300);
 
-    if (intent.type === 'attack') {
-        const dmg = intent.value;
-        const absorbed = Math.min(state.player.block, dmg);
-        state.player.block -= absorbed;
-        const real = dmg - absorbed;
-        state.player.hp = Math.max(0, state.player.hp - real);
-        log(`敌人攻击，造成 ${real} 点伤害（格挡吸收 ${absorbed}）。`);
-        render();
-        await sleep(500);
-    } else if (intent.type === 'buff') {
-        state.enemy.block += intent.value;
-        log(`敌人获得 ${intent.value} 点格挡。`);
-        render();
-        await sleep(500);
+    const actions = state.enemy.queue.slice();
+    for (const intent of actions) {
+        if (state.player.hp <= 0) return;
+
+        if (intent.type === 'attack') {
+            const times = intent.times || 1;
+            for (let t = 0; t < times; t++) {
+                if (state.player.hp <= 0) break;
+                const dmg = intent.value;
+                const absorbed = Math.min(state.player.block, dmg);
+                state.player.block -= absorbed;
+                const real = dmg - absorbed;
+                state.player.hp = Math.max(0, state.player.hp - real);
+                log(`敌人攻击，造成 ${real} 点伤害（格挡吸收 ${absorbed}）。`);
+
+                if (real > 0 && state.enemy.passive?.type === 'chill_player') {
+                    const v = state.enemy.passive.value || 1;
+                    if (state.player.queueLimitPenalty < v) {
+                        state.player.queueLimitPenalty = v;
+                        log(`[${state.enemyDef.name}] 你下回合出牌上限 -${v}。`);
+                    }
+                }
+
+                const ep = state.enemy.passive;
+                if (ep?.type === 'pierce_block' && ep.value > 0) {
+                    state.player.hp = Math.max(0, state.player.hp - ep.value);
+                    log(`[${state.enemyDef.name}] 穿盾，额外造成 ${ep.value} 点真实伤害。`);
+                }
+
+                render();
+                await sleep(500);
+            }
+        } else if (intent.type === 'buff') {
+            state.enemy.block += intent.value;
+            log(`敌人获得 ${intent.value} 点格挡。`);
+            render();
+            await sleep(500);
+        }
+    }
+
+    if (state.enemy.hp <= 0) return;
+
+    if (state.enemy.passive?.type === 'counter_strike') {
+        state.enemy.lastPlayerDamageTaken = state.enemy.damageTakenThisTurn;
+    }
+
+    if (state.enemy.passive?.type === 'fire_growth') {
+        state.enemy.attackGrowthStacks += 1;
+    }
+
+    const penalty = state.enemy.nextQueueLimitPenalty;
+    state.enemy.nextQueueLimitPenalty = 0;
+    state.enemy.queueLimit = Math.max(0, state.enemy.baseQueueLimit - penalty);
+    fillEnemyQueue(state.enemy.queueLimit);
+
+    if (penalty > 0) {
+        log(`敌人的行动序列最大长度降为 ${state.enemy.queueLimit}。`);
     }
 }
 
@@ -597,9 +960,11 @@ async function enemyActAsync() {
 function startNewTurn() {
     state.turn++;
     state.player.block = 0;
-    state.queueLimit = 4;
+    state.queueLimit = Math.max(0, 4 - (state.player.queueLimitPenalty || 0));
+    state.player.queueLimitPenalty = 0;
     state.attacksThisTurn = 0;
     state.specialAttackInsertedThisTurn = false;
+    state.enemy.damageTakenThisTurn = 0;
     state.specialAttackConfig = {
         perAttack: 3,
         flatBonus: 0,
@@ -610,7 +975,6 @@ function startNewTurn() {
     state.discardPile.push(...state.hand);
     state.hand = [];
     drawHand(5);
-    rollEnemyIntent();
 }
 
 /* ============================================
@@ -622,7 +986,6 @@ async function resolveAndEndTurn() {
     state.phase = 'resolving';
     render();
 
-    // 1. L 的追击：立刻插入队尾
     if (state.character?.passive?.type === 'appendSpecialAttack'
         && !state.specialAttackInsertedThisTurn) {
         state.queue.push(makeChaseCard());
@@ -632,7 +995,6 @@ async function resolveAndEndTurn() {
         await sleep(350);
     }
 
-    // 2. 逐张结算
     await resolveQueueAsync();
 
     if (state.phase === 'gameover') {
@@ -640,9 +1002,8 @@ async function resolveAndEndTurn() {
         return;
     }
 
-    // 3. 敌人行动
     await sleep(250);
-    await enemyActAsync();
+    await enemyActAllAsync();
 
     if (state.player.hp <= 0 || state.enemy.hp <= 0) {
         state.phase = 'gameover';
@@ -650,7 +1011,6 @@ async function resolveAndEndTurn() {
         return;
     }
 
-    // 4. 新回合
     await sleep(250);
     startNewTurn();
     state.phase = 'building';
@@ -669,19 +1029,30 @@ function render() {
     document.getElementById('player-block').textContent = state.player.block;
     document.getElementById('queue-limit').textContent = state.queueLimit;
 
+    document.getElementById('enemy-name').textContent = state.enemyDef.name;
     document.getElementById('enemy-hp').textContent = state.enemy.hp;
     document.getElementById('enemy-maxhp').textContent = state.enemy.maxHp;
     document.getElementById('enemy-block').textContent = state.enemy.block;
+    document.getElementById('enemy-queue-limit').textContent = state.enemy.queueLimit;
 
-    const intentEl = document.getElementById('enemy-intent');
-    if (state.enemy.intent) {
-        const i = state.enemy.intent;
-        if (i.type === 'attack') intentEl.textContent = `攻击 ${i.value}`;
-        else if (i.type === 'buff') intentEl.textContent = `格挡 +${i.value}`;
-        else intentEl.textContent = '未知';
+    const enemyQueueEl = document.getElementById('enemy-queue-display');
+    if (state.enemy.queue.length === 0) {
+        enemyQueueEl.innerHTML = '<span style="color:#999;">（无）</span>';
+    } else {
+        enemyQueueEl.innerHTML = state.enemy.queue.map(i => {
+            if (i.type === 'attack') {
+                const times = i.times || 1;
+                const label = times > 1
+                    ? `攻击 ${i.value} × ${times}`
+                    : `攻击 ${i.value}`;
+                return `<span class="slot attack">${label}</span>`;
+            } else if (i.type === 'buff') {
+                return `<span class="slot buff">格挡 +${i.value}</span>`;
+            }
+            return `<span class="slot">未知</span>`;
+        }).join('');
     }
 
-    // 队列
     const queueEl = document.getElementById('spire-queue');
     if (state.queue.length === 0) {
         queueEl.textContent = '出牌队列：（空）';
@@ -695,7 +1066,6 @@ function render() {
             }).join('');
     }
 
-    // 手牌
     const handEl = document.getElementById('spire-hand');
     handEl.innerHTML = '';
     state.hand.forEach((card, i) => {
@@ -709,12 +1079,10 @@ function render() {
         handEl.appendChild(el);
     });
 
-    // 日志
     const logEl = document.getElementById('spire-log');
     logEl.innerHTML = state.log.slice(-40).map(l => `<div>${l}</div>`).join('');
     logEl.scrollTop = logEl.scrollHeight;
 
-    // 按钮
     document.getElementById('resolve-btn').disabled = state.phase !== 'building';
     document.getElementById('restart-btn').disabled = state.phase === 'resolving';
 }
@@ -728,9 +1096,14 @@ document.getElementById('resolve-btn').addEventListener('click', () => {
 
 document.getElementById('restart-btn').addEventListener('click', () => {
     if (state && state.phase === 'resolving') return;
-    state = null;
     document.getElementById('spire-log').innerHTML = '';
     showCharacterSelect();
+});
+
+document.getElementById('start-battle-btn').addEventListener('click', () => {
+    if (selectedCharKey && selectedEnemyKey) {
+        startBattle(selectedCharKey, selectedEnemyKey);
+    }
 });
 
 /* ============================================
@@ -738,10 +1111,12 @@ document.getElementById('restart-btn').addEventListener('click', () => {
    ============================================ */
 Promise.all([
     fetch('/data/ruogelike-card.json').then(r => r.json()),
-    fetch('/data/ruogelike-character.json').then(r => r.json())
-]).then(([cards, chars]) => {
+    fetch('/data/ruogelike-character.json').then(r => r.json()),
+    fetch('/data/ruogelike-enemy.json').then(r => r.json())
+]).then(([cards, chars, enemies]) => {
     CARD_LIBRARY = cards;
     CHARACTER_LIBRARY = chars;
+    ENEMY_LIBRARY = enemies;
     showCharacterSelect();
 }).catch(err => {
     console.error('未能成功加载数据', err);
