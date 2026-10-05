@@ -7,14 +7,21 @@
         "passive": { "type": "lifesteal", "costPercent": 0.2 },
         "deck": ["strike", "strike", "strike", "strike_one", "strike_one",
                  "defend", "defend", "defend", "defend",
-                 "strike_two","strike_blood"]
+                 "strike_two", "strike_blood"]
     },
     "L": {
         "id": "l",
         "name": "追刃",
         "description": "开始行动前，在行动序列末尾添加一张「追击」。",
         "maxHp": 80,
-        "passive": { "type": "appendSpecialAttack", "damagePerAttack": 3 },
+        "passive": {
+            "type": "insertCard",
+            "card": "chase",
+            "trigger": "beforeResolve",
+            "count": 1,
+            "target": "queue",
+            "oncePerTurn": true
+        },
         "deck": ["strike", "strike", "strike", "strike_one", "strike_one",
                  "defend", "defend", "defend", "defend",
                  "strike_two", "chase_sharp", "chase_pierce", "chase_density"]
@@ -35,6 +42,49 @@
         "description": "造成体力伤害时，使目标下回合行动序列最大长度 -1（不叠加）。",
         "maxHp": 80,
         "passive": { "type": "reduceEnemyQueueLimit", "value": 1 },
+        "deck": ["strike", "strike", "strike", "strike_one", "strike_one",
+                 "defend", "defend", "defend", "defend",
+                 "strike_two"]
+    },
+    "A": {
+        "id": "A",
+        "name": "虚构",
+        "description": "行动前，若行动序列未达到最大长度，尽可能地填充「设想」。",
+        "maxHp": 80,
+        "passive": {
+            "type": "insertCard",
+            "card": "fill",
+            "trigger": "beforeResolve",
+            "count": "fillToLimit",
+            "target": "queue"
+        },
+        "deck": ["strike", "strike", "strike", "strike_one", "strike_one",
+                 "defend", "defend", "defend", "defend",
+                 "strike_two", "snowball"]
+    },
+    "B": {
+        "id": "B",
+        "name": "希望",
+        "description": "回合开始时的抽牌数 -1，同时生成 1 张「抉择」。",
+        "maxHp": 80,
+        "passive": {
+            "type": "insertCard",
+            "card": "choice",
+            "trigger": "turnStart",
+            "count": 1,
+            "target": "hand",
+            "drawPenalty": 1
+        },
+        "deck": ["strike", "strike", "strike", "strike_one", "strike_one",
+                 "defend", "defend", "defend", "defend",
+                 "strike_two"]
+    },
+    "Rock": {
+        "id": "Rock",
+        "name": "岁月",
+        "description": "回合结束时不失去格挡。",
+        "maxHp": 80,
+        "passive": { "type": "blockPersist" },
         "deck": ["strike", "strike", "strike", "strike_one", "strike_one",
                  "defend", "defend", "defend", "defend",
                  "strike_two"]

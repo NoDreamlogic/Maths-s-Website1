@@ -32,7 +32,14 @@
         "name": "反攻",
         "description": "造成 5+40%已损体力值 点伤害。",
         "tags": ["attack"],
-    "effects": [{ "type": "lostHpDamage", "flat": 5, "lostHpPercent": 0.4 }]
+        "effects": [{ "type": "lostHpDamage", "flat": 5, "lostHpPercent": 0.4 }]
+    },
+    "snowball": {
+        "id": "snowball",
+        "name": "渐强",
+        "description": "对此牌及之后的牌施加一个效果，持有此效果的卡在被使用时额外使位于其之后的卡的部分数值获得+1。",
+        "tags": ["buff"],
+        "effects": [{ "type": "snowball" }]
     },
     "chase_sharp": {
         "id": "chase_sharp",

@@ -5,17 +5,17 @@
         "description": "具有强烈的进攻欲望，如果拖得太久的话，情况会越来越糟。",
         "maxHp": 80,
         "queueLimit": 2,
-        "passive": { "type": "fire_growth", "value": 2 },
+        "passive": { "type": "fire_growth", "value": 1 },
         "intentPool": [
-            { "weight": 70, "type": "attack", "value": 5 },
-            { "weight": 30, "type": "buff", "value": 3 }
+            { "weight": 70, "type": "attack", "value": 6 },
+            { "weight": 30, "type": "buff", "value": 5 }
         ]
     },
     "TheCounter": {
         "id": "TheCounter",
         "name": "守备",
         "description": "你前一回合造成的伤害越多，它的攻击力度越大。",
-        "maxHp": 50,
+        "maxHp": 80,
         "queueLimit": 2,
         "passive": { "type": "counter_strike", "ratio": 0.4 },
         "intentPool": [
@@ -34,18 +34,18 @@
         "intentPool": [
             { "weight": 50, "type": "attack", "value": 4, "times": 2 },
             { "weight": 30, "type": "attack", "value": 8 },
-            { "weight": 20, "type": "buff", "value": 10 }
+            { "weight": 20, "type": "buff", "value": 8 }
         ]
     },
     "TheWind": {
         "id": "TheWind",
         "name": "疾风",
         "description": "极为迅捷的动作使得其可以额外行动。",
-        "maxHp": 35,
+        "maxHp": 80,
         "queueLimit": 3,
         "intentPool": [
-            { "weight": 60, "type": "attack", "value": 12 },
-            { "weight": 40, "type": "buff", "value": 8 }
+            { "weight": 60, "type": "attack", "value": 8 },
+            { "weight": 40, "type": "buff", "value": 5 }
         ]
     },
     "TheCyan": {
@@ -56,32 +56,32 @@
         "queueLimit": 2,
         "passive": { "type": "pierce_block", "value": 2 },
         "intentPool": [
-            { "weight": 60, "type": "attack", "value": 12 },
-            { "weight": 40, "type": "buff", "value": 8 }
+            { "weight": 60, "type": "attack", "value": 8 },
+            { "weight": 40, "type": "buff", "value": 5 }
         ]
     },
     "TheSnow": {
         "id": "TheSnow",
         "name": "雪影",
         "description": "你的动作似乎变迟缓了……是错觉吗？",
-        "maxHp": 35,
+        "maxHp": 80,
         "queueLimit": 2,
         "passive": { "type": "chill_player", "value": 1 },
         "intentPool": [
-            { "weight": 60, "type": "attack", "value": 12 },
-            { "weight": 40, "type": "buff", "value": 8 }
+            { "weight": 60, "type": "attack", "value": 8 },
+            { "weight": 40, "type": "buff", "value": 5 }
         ]
     },
     "TheArcane": {
         "id": "TheArcane",
         "name": "阈限",
         "description": "你似乎始终无法准确地命中它。",
-        "maxHp": 35,
+        "maxHp": 80,
         "queueLimit": 2,
         "passive": { "type": "damage_cap", "percent": 0.25 },
         "intentPool": [
-            { "weight": 60, "type": "attack", "value": 12 },
-            { "weight": 40, "type": "buff", "value": 8 }
+            { "weight": 60, "type": "attack", "value": 8 },
+            { "weight": 40, "type": "buff", "value": 5 }
         ]
     }
 }
