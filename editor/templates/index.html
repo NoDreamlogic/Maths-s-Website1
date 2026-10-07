@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hugo 文章编辑器</title>
+<link rel="stylesheet" href="/static/easymde.min.css">
+<style>
+    .editor-toolbar button.tb {
+  width: auto;
+  min-width: 32px;
+  padding: 0 8px;
+  font-weight: 600;
+  font-size: 13px;
+  line-height: 30px;
+}
+.editor-toolbar button.tb.active,
+.editor-toolbar button.tb:hover {
+  background: #e8ecf2;
+  border-color: #cfd6df;
+}
+:root { --border:#e2e2e2; --bg:#fafafa; --accent:#2f6feb; }
+* { box-sizing: border-box; }
+html, body { height:100%; margin:0; }
+body {
+  display:flex; flex-direction:column; overflow:hidden;
+  font-family:"Segoe UI","Microsoft YaHei",system-ui,sans-serif;
+  font-size:14px; color:#222;
+}
+/* ---------- 顶栏 ---------- */
+#topbar {
+  display:flex; align-items:center; gap:16px; flex-wrap:wrap;
+  padding:8px 14px; border-bottom:1px solid var(--border); background:#fff;
+}
+.brand { font-weight:600; font-size:15px; white-space:nowrap; }
+.fields { display:flex; align-items:center; gap:8px; flex:1; flex-wrap:wrap; }
+.fields input[type=text], .fields input[type=datetime-local] {
+  padding:6px 8px; border:1px solid var(--border); border-radius:6px; font-size:13px;
+  font-family:inherit; color:inherit;
+}
+#f-title { flex:1 1 220px; min-width:160px; font-weight:600; }
+#f-tags  { flex:1 1 200px; min-width:140px; }
+.chk { display:inline-flex; align-items:center; gap:4px; white-space:nowrap; font-size:13px; cursor:pointer; }
+button {
+  padding:6px 12px; border:1px solid var(--border); background:#fff; color:#222;
+  border-radius:6px; cursor:pointer; font-size:13px; font-family:inherit;
+}
+button:hover { background:#f2f4f7; }
+button.primary { background:var(--accent); border-color:var(--accent); color:#fff; }
+button.primary:hover { background:#2359c4; }
+/* ---------- 主体 ---------- */
+main { flex:1; display:flex; min-height:0; }
+#sidebar {
+  width:260px; flex:0 0 260px; background:var(--bg);
+  border-right:1px solid var(--border);
+  display:flex; flex-direction:column; min-height:0;
+}
+.side-head { display:flex; gap:6px; padding:8px; border-bottom:1px solid var(--border); }
+.side-head button { flex:1; }
+#post-list { list-style:none; margin:0; padding:6px; overflow-y:auto; flex:1; }
+#post-list li {
+  padding:8px 10px; border-radius:6px; cursor:pointer;
+  border:1px solid transparent; margin-bottom:2px;
+}
+#post-list li:hover { background:#eef1f5; }
+#post-list li.active { background:#e4ecfd; border-color:#b9cdf7; }
+#post-list li .t { display:block; font-weight:600; font-size:13px; word-break:break-all; }
+#post-list li .m { display:block; font-size:11px; color:#888; margin-top:3px; word-break:break-all; }
+.badge {
+  display:inline-block; background:#ffe7ba; color:#8a5a00;
+  border-radius:3px; padding:0 4px; margin-left:4px; font-size:10px; vertical-align:middle;
+}
+.empty { padding:16px; color:#999; font-size:12px; line-height:1.7; }
+/* ---------- 编辑器区 ---------- */
+#editor-area { flex:1; display:flex; flex-direction:column; min-width:0; min-height:0; }
+#toolbar-hint {
+  padding:6px 12px; font-size:12px; color:#666; background:#fff;
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+}
+#panes { flex:1; display:flex; min-height:0; }
+#editor-pane {
+  position:relative; flex:1 1 50%; min-width:0; border-right:1px solid var(--border);
+}
+#editor-pane > .EasyMDEContainer:not(.fullscreen) {
+  position:absolute; top:0; right:0; bottom:0; left:0;
+  display:flex; flex-direction:column;
+}
+#editor-pane .CodeMirror { flex:1 1 auto; height:auto; min-height:0; font-size:14px; }
+#preview-pane { flex:1 1 50%; min-width:0; overflow-y:auto; padding:18px 24px; background:#fff; }
+body.no-preview #preview-pane { display:none; }
+body.no-preview #editor-pane { flex:1 1 100%; border-right:none; }
+/* ---------- 预览样式 ---------- */
+.markdown-body { font-size:15px; line-height:1.75; word-wrap:break-word; }
+.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4 { margin:1.2em 0 .6em; line-height:1.3; }
+.markdown-body h1 { font-size:1.8em; border-bottom:1px solid #eee; padding-bottom:.3em; }
+.markdown-body h2 { font-size:1.45em; border-bottom:1px solid #eee; padding-bottom:.3em; }
+.markdown-body h3 { font-size:1.2em; }
+.markdown-body > :first-child { margin-top:0; }
+.markdown-body p { margin:.8em 0; }
+.markdown-body code {
+  background:#f2f3f5; padding:.15em .35em; border-radius:4px;
+  font-family:Consolas,"Courier New",monospace; font-size:.9em;
+}
+.markdown-body pre { background:#f6f8fa; padding:12px; border-radius:6px; overflow-x:auto; }
+.markdown-body pre code { background:none; padding:0; }
+.markdown-body blockquote {
+  margin:.8em 0; padding:.3em 1em; color:#666;
+  border-left:4px solid #dfe2e5; background:#fafafa;
+}
+.markdown-body ul,.markdown-body ol { padding-left:1.6em; }
+.markdown-body img { max-width:100%; }
+.markdown-body a { color:var(--accent); }
+.markdown-body table { border-collapse:collapse; margin:.8em 0; }
+.markdown-body th,.markdown-body td { border:1px solid #dfe2e5; padding:6px 12px; }
+.markdown-body hr { border:none; border-top:1px solid #eee; margin:1.5em 0; }
+/* ---------- 提示条 ---------- */
+#toast {
+  position:fixed; left:50%; bottom:28px; z-index:9999;
+  transform:translateX(-50%) translateY(20px);
+  background:rgba(30,30,30,.92); color:#fff; padding:10px 18px;
+  border-radius:8px; font-size:13px; opacity:0; pointer-events:none;
+  transition:opacity .22s, transform .22s;
+}
+#toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+#toast.error { background:rgba(180,40,40,.94); }
+</style>
+</head>
+<body>
+
+<header id="topbar">
+  <div class="brand">Hugo 文章编辑器</div>
+  <div class="fields">
+    <input id="f-title" type="text" placeholder="文章标题">
+    <input id="f-date" type="datetime-local">
+    <input id="f-tags" type="text" placeholder="标签，用逗号分隔，如：生活, 随笔">
+    <label class="chk"><input id="f-draft" type="checkbox"> 存为草稿</label>
+    <button id="btn-save" class="primary">保存 (Ctrl+S)</button>
+  </div>
+</header>
+
+<main>
+  <aside id="sidebar">
+    <div class="side-head">
+      <button id="btn-new">＋ 新建文章</button>
+      <button id="btn-refresh" title="重新读取文章列表">刷新</button>
+    </div>
+    <ul id="post-list"></ul>
+    <div id="list-empty" class="empty">还没有文章，点上面的「＋ 新建文章」开始吧。</div>
+  </aside>
+
+  <section id="editor-area">
+    <div id="toolbar-hint">
+      <span>工具栏从左到右：<b>B</b> 加粗 · <i>I</i> 斜体 · 标题 · 引用 · 无序列表 · 有序列表 · 链接 · 图片 · 代码块 · 撤销 · 重做 · 全屏</span>
+      <label class="chk"><input id="toggle-preview" type="checkbox" checked> 显示实时预览</label>
+    </div>
+    <div id="panes">
+      <div id="editor-pane"><textarea id="md"></textarea></div>
+      <div id="preview-pane"><div id="preview" class="markdown-body"></div></div>
+    </div>
+  </section>
+</main>
+
+<div id="toast"></div>
+
+<script src="/static/easymde.min.js"></script>
+<script src="/static/marked.min.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  var editor = null;
+  var currentFile = null;
+  var dirty = false;
+  var previewTimer = null;
+
+  /* ---------------- 与后端通信 ---------------- */
+  var api = {
+    list: function () {
+      return fetch("/api/posts").then(handle);
+    },
+    get: function (name) {
+      return fetch("/api/posts/" + encodeURIComponent(name)).then(handle);
+    },
+    create: function (payload) {
+      return fetch("/api/posts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      }).then(handle);
+    },
+    save: function (name, payload) {
+      return fetch("/api/posts/" + encodeURIComponent(name), {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      }).then(handle);
+    }
+  };
+
+  function handle(res) {
+    if (res.ok) return res.json();
+    return res.json().catch(function () { return {}; }).then(function (data) {
+      throw new Error(data.error || ("请求失败（" + res.status + "）"));
+    });
+  }
+
+  /* ---------------- 小工具 ---------------- */
+  var toastTimer = null;
+  function toast(msg, isError) {
+    var el = document.getElementById("toast");
+    el.textContent = msg;
+    el.classList.toggle("error", !!isError);
+    el.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { el.classList.remove("show"); }, 2400);
+  }
+
+  function pad(n) { return (n < 10 ? "0" : "") + n; }
+
+  function toLocalInput(d) {
+    return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate())
+      + "T" + pad(d.getHours()) + ":" + pad(d.getMinutes());
+  }
+  function nowLocalInput() { return toLocalInput(new Date()); }
+  function isoToLocalInput(iso) {
+    if (!iso) return nowLocalInput();
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return String(iso).slice(0, 16);
+    return toLocalInput(d);
+  }
+
+  function renderPreview() {
+    var text = editor ? editor.value() : "";
+    var html = "";
+    try {
+      html = (typeof marked.parse === "function") ? marked.parse(text) : marked(text);
+    } catch (e) {
+      html = "<p style='color:#c00'>预览渲染出错：" + String(e.message || e) + "</p>";
+    }
+    document.getElementById("preview").innerHTML = html;
+  }
+
+  function schedulePreview() {
+    clearTimeout(previewTimer);
+    previewTimer = setTimeout(renderPreview, 120);
+  }
+
+  /* ---------------- 文章列表 ---------------- */
+  function refreshList() {
+    return api.list().then(function (posts) {
+      var ul = document.getElementById("post-list");
+      ul.innerHTML = "";
+      document.getElementById("list-empty").style.display = posts.length ? "none" : "block";
+
+      posts.forEach(function (p) {
+        var li = document.createElement("li");
+        li.dataset.filename = p.filename;
+        if (p.filename === currentFile) li.classList.add("active");
+
+        var t = document.createElement("span");
+        t.className = "t";
+        t.textContent = p.title || p.filename;
+        if (p.draft) {
+          var b = document.createElement("span");
+          b.className = "badge";
+          b.textContent = "草稿";
+          t.appendChild(b);
+        }
+
+        var m = document.createElement("span");
+        m.className = "m";
+        m.textContent = (p.date || "").slice(0, 10) + " · " + p.filename;
+
+        li.appendChild(t);
+        li.appendChild(m);
+        li.addEventListener("click", function () { openPost(p.filename); });
+        ul.appendChild(li);
+      });
+
+      return posts;
+    });
+  }
+
+  function highlightActive() {
+    var items = document.querySelectorAll("#post-list li");
+    for (var i = 0; i < items.length; i++) {
+      items[i].classList.toggle("active", items[i].dataset.filename === currentFile);
+    }
+  }
+
+  /* ---------------- 打开 / 新建 / 保存 ---------------- */
+  function confirmDiscard() {
+    if (!dirty) return true;
+    return window.confirm("当前文章还有未保存的改动，确定要放弃吗？");
+  }
+
+  function openPost(filename) {
+    if (!confirmDiscard()) return;
+    api.get(filename).then(function (post) {
+      currentFile = post.filename;
+      document.getElementById("f-title").value = post.title || "";
+      document.getElementById("f-date").value = isoToLocalInput(post.date);
+      document.getElementById("f-tags").value = (post.tags || []).join(", ");
+      document.getElementById("f-draft").checked = !!post.draft;
+      editor.value(post.body || "");
+      dirty = false;
+      renderPreview();
+      highlightActive();
+      toast("已打开：" + post.filename);
+    }).catch(function (err) {
+      toast(err.message, true);
+    });
+  }
+
+  function newPost() {
+    if (!confirmDiscard()) return;
+    currentFile = null;
+    document.getElementById("f-title").value = "";
+    document.getElementById("f-date").value = nowLocalInput();
+    document.getElementById("f-tags").value = "";
+    document.getElementById("f-draft").checked = true;
+    editor.value("");
+    dirty = false;
+    renderPreview();
+    highlightActive();
+    document.getElementById("f-title").focus();
+  }
+
+  function collectPayload() {
+    return {
+      title: document.getElementById("f-title").value.trim(),
+      date: document.getElementById("f-date").value,
+      tags: document.getElementById("f-tags").value,
+      draft: document.getElementById("f-draft").checked,
+      body: editor.value()
+    };
+  }
+
+  function savePost() {
+    var payload = collectPayload();
+    if (!payload.title) {
+      toast("请先填写文章标题", true);
+      document.getElementById("f-title").focus();
+      return;
+    }
+    var action = (currentFile === null) ? api.create(payload) : api.save(currentFile, payload);
+
+    action.then(function (res) {
+      currentFile = res.filename;
+      dirty = false;
+      toast((res.ok && res.filename === currentFile && payload) ? "已保存：" + res.filename : "已保存");
+      return refreshList();
+    }).then(function () {
+      highlightActive();
+    }).catch(function (err) {
+      toast(err.message, true);
+    });
+  }
+
+  /* ---------------- 初始化 ---------------- */
+  function init() {
+    editor = new EasyMDE({
+      element: document.getElementById("md"),
+      autofocus: false,
+      spellChecker: false,
+      autoDownloadFontAwesome: false,
+      status: ["lines", "words"],
+      placeholder: "在这里写 Markdown 正文……",
+      renderingConfig: { singleLineBreaks: false, codeSyntaxHighlighting: false },
+      toolbar: [
+  { name: "bold",       action: EasyMDE.toggleBold,           className: "tb", text: "B",   title: "加粗 (Ctrl+B)" },
+  { name: "italic",     action: EasyMDE.toggleItalic,         className: "tb", text: "I",   title: "斜体 (Ctrl+I)" },
+  { name: "heading",    action: EasyMDE.toggleHeadingSmaller, className: "tb", text: "H",   title: "标题" },
+  "|",
+  { name: "quote",      action: EasyMDE.toggleBlockquote,     className: "tb", text: "❝",   title: "引用" },
+  { name: "ul",         action: EasyMDE.toggleUnorderedList,  className: "tb", text: "•",   title: "无序列表" },
+  { name: "ol",         action: EasyMDE.toggleOrderedList,    className: "tb", text: "1.",  title: "有序列表" },
+  "|",
+  { name: "link",       action: EasyMDE.drawLink,             className: "tb", text: "🔗",  title: "链接" },
+  { name: "image",      action: EasyMDE.drawImage,            className: "tb", text: "🖼",  title: "图片" },
+  { name: "code",       action: EasyMDE.toggleCodeBlock,      className: "tb", text: "</>", title: "代码块" },
+  "|",
+  { name: "undo",       action: EasyMDE.undo,                 className: "tb", text: "↶",   title: "撤销" },
+  { name: "redo",       action: EasyMDE.redo,                 className: "tb", text: "↷",   title: "重做" },
+  "|",
+  { name: "fullscreen", action: EasyMDE.toggleFullScreen,     className: "tb", text: "⛶",   title: "全屏" }
+]
+    });
+
+    editor.codemirror.on("change", function () {
+      dirty = true;
+      schedulePreview();
+    });
+
+    document.getElementById("btn-new").addEventListener("click", newPost);
+    document.getElementById("btn-save").addEventListener("click", savePost);
+    document.getElementById("btn-refresh").addEventListener("click", function () {
+      refreshList().then(function () {
+        highlightActive();
+        toast("列表已刷新");
+      }).catch(function (err) { toast(err.message, true); });
+    });
+
+    document.getElementById("toggle-preview").addEventListener("change", function (e) {
+      document.body.classList.toggle("no-preview", !e.target.checked);
+    });
+
+    document.addEventListener("keydown", function (e) {
+      if ((e.ctrlKey || e.metaKey) && (e.key === "s" || e.key === "S")) {
+        e.preventDefault();
+        savePost();
+      }
+    });
+
+    window.addEventListener("beforeunload", function (e) {
+      if (dirty) { e.preventDefault(); e.returnValue = ""; }
+    });
+
+    refreshList().then(function (posts) {
+      if (posts.length > 0) {
+        openPost(posts[0].filename);
+      } else {
+        newPost();
+      }
+    }).catch(function (err) {
+      toast("读取文章列表失败：" + err.message, true);
+      newPost();
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();
+</script>
+</body>
+</html>
