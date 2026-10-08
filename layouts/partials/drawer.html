@@ -14,6 +14,17 @@
         <a href="/#right-sidebar">站主简介</a>
     </nav>
 
+    <div id="font-box">
+        <h3 class="drawer-subtitle">字体</h3>
+        <select id="font-select">
+            <option value="font-default">默认</option>
+            <option value="font-serif">衬线</option>
+            <option value="font-kai">楷体</option>
+            <option value="font-round">圆润</option>
+            <option value="font-custom">致像素</option>
+        </select>
+    </div>
+
     <div id="music-box">
         <h3 class="drawer-subtitle">音乐盒</h3>
         <div id="music-title">未选择曲目</div>
@@ -28,6 +39,52 @@
 </aside>
 
 <style>
+
+    /* 自定义字体的应用规则 */
+    @font-face {
+        font-family: "MineFont";
+        src: url('/fonts/Unifont.woff2') format('woff2');
+        font-display: swap;
+    }
+    body.font-custom {
+        font-family: "MineFont", system-ui, "Microsoft YaHei", sans-serif;
+    }
+    body.font-default {
+        font-family: system-ui, -apple-system, "Microsoft YaHei", "微软雅黑", sans-serif;
+    }
+    body.font-serif {
+        font-family: Georgia, "Songti SC", "SimSun", "宋体", serif;
+    }
+    body.font-kai {
+        font-family: "Kaiti SC", "KaiTi", "楷体", serif;
+    }
+    body.font-round {
+        font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    }
+
+    /* ===== 字体选择框 ===== */
+    #font-box {
+        padding-top: 20px;
+        border-top: 1px dashed var(--drawer-border, #eee);
+        margin-bottom: 20px;
+    }
+    #font-select {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 8px 10px;
+        border: 1px solid var(--card-border, #eee);
+        border-radius: 6px;
+        background: var(--drawer-bg, #fff);
+        color: var(--text-primary, #222);
+        font-size: 0.9em;
+        font-family: inherit;
+        cursor: pointer;
+    }
+    #font-select:hover {
+        border-color: var(--text-tertiary, #999);
+    }
+
+    /* ===== 抽屉按钮 ===== */
     #drawer-toggle {
         position: fixed;
         right: 20px;
@@ -54,6 +111,8 @@
         border-color: var(--text-tertiary, #999);
         transform: translateY(-50%) scale(1.06);
     }
+
+    /* ===== 遮罩 ===== */
     #drawer-mask {
         position: fixed;
         inset: 0;
@@ -67,6 +126,8 @@
         opacity: 1;
         pointer-events: auto;
     }
+
+    /* ===== 抽屉面板 ===== */
     #drawer {
         position: fixed;
         right: 0;
@@ -136,6 +197,8 @@
         margin: 0 0 12px;
         letter-spacing: 0.05em;
     }
+
+    /* ===== 音乐盒 ===== */
     #music-box {
         display: flex;
         flex-direction: column;
@@ -221,6 +284,36 @@
         return div.innerHTML;
     }
 
+        /* ===== 字体切换 ===== */
+    const FONT_KEY = 'site-font';
+    const DEFAULT_FONT = 'font-default';
+
+    function applyFont(fontClass) {
+        document.body.classList.remove(
+            'font-default', 'font-serif', 'font-kai', 'font-round', 'font-custom'
+        );
+        document.body.classList.add(fontClass);
+        const sel = document.getElementById('font-select');
+        if (sel) sel.value = fontClass;
+    }
+
+    function initFont() {
+        const saved = localStorage.getItem(FONT_KEY) || DEFAULT_FONT;
+        applyFont(saved);
+
+        const sel = document.getElementById('font-select');
+        if (sel) {
+            sel.addEventListener('change', () => {
+                const f = sel.value;
+                localStorage.setItem(FONT_KEY, f);
+                applyFont(f);
+            });
+        }
+    }
+
+    initFont();
+
+    /* ===== 抽屉面板 ===== */
     const drawer = document.getElementById('drawer');
     const drawerToggle = document.getElementById('drawer-toggle');
     const drawerClose = document.getElementById('drawer-close');
@@ -241,6 +334,7 @@
         drawerMask.classList.remove('active');
     });
 
+    /* ===== 音乐盒 ===== */
     const bgm = document.getElementById('bgm');
     const musicPlay = document.getElementById('music-play');
     const musicPrev = document.getElementById('music-prev');

@@ -3,7 +3,6 @@
 {{ partial "head.html" . }}
 <link rel="icon" type="image/png" href="/favicon.png">
 
-<link rel="stylesheet" href="https://unpkg.com/@waline/client@v3/dist/waline.css" />
 
 <body id="top">
     {{ partial "drawer.html" . }}
@@ -71,6 +70,19 @@
         </div>
 
         <style>
+             /* ===== 字体方案 ===== */
+            body.font-default {
+                font-family: system-ui, -apple-system, "Microsoft YaHei", "微软雅黑", sans-serif;
+            }
+            body.font-serif {
+                font-family: Georgia, "Songti SC", "SimSun", "宋体", serif;
+            }
+            body.font-kai {
+                font-family: "Kaiti SC", "KaiTi", "楷体", serif;
+            }
+            body.font-round {
+                font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            }
             /* ===== 颜色变量（亮色） ===== */
             :root {
                 --card-bg: #fafafa;
