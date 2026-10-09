@@ -2,7 +2,7 @@
     "W": {
         "id": "w",
         "name": "燃血",
-        "description": "使用攻击类技能后，损失20%当前生命值，并回复等同于100%造成体力伤害的生命值。",
+        "description": "使用攻击类卡牌后，损失20%当前生命值，并回复等同于100%造成体力伤害的生命值。",
         "maxHp": 80,
         "passive": { "type": "lifesteal", "costPercent": 0.2 },
         "deck": ["strike", "strike", "strike", "strike_one", "strike_one",
@@ -14,14 +14,7 @@
         "name": "追刃",
         "description": "开始行动前，在行动序列末尾添加一张「追击」。",
         "maxHp": 80,
-        "passive": {
-            "type": "insertCard",
-            "card": "chase",
-            "trigger": "beforeResolve",
-            "count": 1,
-            "target": "queue",
-            "oncePerTurn": true
-        },
+        "passive": { "type": "appendSpecialAttack", "damagePerAttack": 3 },
         "deck": ["strike", "strike", "strike", "strike_one", "strike_one",
                  "defend", "defend", "defend", "defend",
                  "strike_two", "chase_sharp", "chase_pierce", "chase_density"]
@@ -29,7 +22,7 @@
     "K": {
         "id": "Wind",
         "name": "寻风",
-        "description": "使用的攻击牌获得连击次数+1。",
+        "description": "使用带有连击的攻击牌时，连击次数 +1。",
         "maxHp": 80,
         "passive": { "type": "extraDamageRepeat", "value": 1 },
         "deck": ["strike", "strike", "strike", "strike_one", "strike_one",
@@ -39,7 +32,7 @@
     "Snowy": {
         "id": "Snowy",
         "name": "冷冻",
-        "description": "造成体力伤害时，使目标下回合行动序列最大长度 -1（不叠加）。",
+        "description": "造成伤害时，使目标下回合行动序列最大长度 -1（不叠加）。",
         "maxHp": 80,
         "passive": { "type": "reduceEnemyQueueLimit", "value": 1 },
         "deck": ["strike", "strike", "strike", "strike_one", "strike_one",
@@ -48,43 +41,75 @@
     },
     "A": {
         "id": "A",
-        "name": "虚构",
-        "description": "行动前，若行动序列未达到最大长度，尽可能地填充「设想」。",
+        "name": "梦境",
+        "description": "行动前，若行动序列未达到最大长度，尽可能地填充「虚构」。",
         "maxHp": 80,
-        "passive": {
-            "type": "insertCard",
-            "card": "fill",
-            "trigger": "beforeResolve",
-            "count": "fillToLimit",
-            "target": "queue"
-        },
+        "passive": { "type": "insertCard", "card": "fill", "trigger": "beforeResolve",
+                     "count": "fillToLimit", "target": "queue" },
         "deck": ["strike", "strike", "strike", "strike_one", "strike_one",
                  "defend", "defend", "defend", "defend",
                  "strike_two", "snowball"]
     },
     "B": {
         "id": "B",
-        "name": "希望",
-        "description": "回合开始时的抽牌数 -1，同时生成 1 张「抉择」。",
+        "name": "思想",
+        "description": "回合开始时的抽牌数 -1，同时生成 1 张「祈愿」。",
+        "maxHp": 80,
+        "passive": { "type": "insertCard", "card": "choice", "trigger": "turnStart",
+                     "count": 1, "target": "hand", "drawPenalty": 1 },
+        "deck": ["strike", "strike", "strike", "strike_one", "strike_one",
+                 "defend", "defend", "defend", "defend",
+                 "strike_two"]
+    },
+    "TheDefencer": {
+        "id": "TheDefencer",
+        "name": "坚韧",
+        "description": "回合结束时不失去格挡。",
+        "maxHp": 80,
+        "passive": { "type": "blockPersist" },
+        "deck": ["strike", "strike", "strike", "strike_one", "strike_one",
+                 "defend", "defend", "defend", "defend",
+                 "strike_two"]
+    },
+    "TheTime": {
+        "id": "TheTime",
+        "name": "时光",
+        "description": "回合开始时，将手牌中的「新生」标签转化为「成熟」标签，然后赋予其他卡「新生」标签。",
         "maxHp": 80,
         "passive": {
-            "type": "insertCard",
-            "card": "choice",
-            "trigger": "turnStart",
-            "count": 1,
-            "target": "hand",
-            "drawPenalty": 1
+            "type": "matureHand",
+            "newbornMultiplier": 0.5,
+            "matureMultiplier": 2.0
         },
         "deck": ["strike", "strike", "strike", "strike_one", "strike_one",
                  "defend", "defend", "defend", "defend",
                  "strike_two"]
     },
-    "Rock": {
-        "id": "Rock",
-        "name": "岁月",
-        "description": "回合结束时不失去格挡。",
+    "Adventure": {
+        "id": "Adventure",
+        "name": "冒险",
+        "description": "开始行动前销毁所有手牌。每销毁一张攻击牌，本回合所有攻击 +2 伤害；每销毁一张状态牌，获得 3 点格挡。",
         "maxHp": 80,
-        "passive": { "type": "blockPersist" },
+        "passive": {
+            "type": "adventure",
+            "attackBonusPerCard": 2,
+            "blockPerCard": 3
+        },
+        "deck": ["strike", "strike", "strike", "strike_one", "strike_one",
+                 "defend", "defend", "defend", "defend",
+                 "strike_two"]
+    },
+    "Fundament": {
+        "id": "Fundament",
+        "name": "协同",
+        "description": "抽牌数 +1，手牌上限 +2，行动序列最大长度 +1。",
+        "maxHp": 80,
+        "passive": {
+            "type": "resources",
+            "drawBonus": 1,
+            "handLimitBonus": 2,
+            "queueLimitBonus": 1
+        },
         "deck": ["strike", "strike", "strike", "strike_one", "strike_one",
                  "defend", "defend", "defend", "defend",
                  "strike_two"]

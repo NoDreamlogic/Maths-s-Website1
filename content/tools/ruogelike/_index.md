@@ -89,13 +89,20 @@ title: "迷你游戏"
     }
     #spire-hand {
         display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
+        flex-wrap: nowrap;
+        justify-content: center;
+        align-items: flex-end;
+        gap: 0;
         margin: 16px 0;
-        min-height: 90px;
+        min-height: 130px;
+        padding: 12px 0 6px;
     }
     .spire-card {
+        position: relative;
+        flex: 0 0 auto;
         width: 90px;
+        height: 110px;
+        box-sizing: border-box;
         padding: 12px 8px;
         background: #fff;
         border: 1px solid #ddd;
@@ -103,14 +110,20 @@ title: "迷你游戏"
         cursor: pointer;
         text-align: center;
         font-size: 0.85em;
-        transition: all 0.2s;
+        transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
         user-select: none;
         -webkit-user-select: none;
         -webkit-touch-callout: none;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
     }
     .spire-card:hover {
         border-color: #999;
-        transform: translateY(-2px);
+        transform: translateY(-8px);
+        z-index: 10;
+        box-shadow: 0 6px 16px rgba(0,0,0,0.18);
     }
     .spire-card.disabled {
         opacity: 0.4;
@@ -119,6 +132,8 @@ title: "迷你游戏"
     .spire-card.disabled:hover {
         transform: none;
         border-color: #ddd;
+        box-shadow: none;
+        z-index: auto;
     }
     .spire-card .name {
         font-weight: 600;
@@ -127,8 +142,24 @@ title: "迷你游戏"
     .spire-card .desc {
         display: none;
     }
+    .card-badge {
+        position: absolute;
+        top: -6px;
+        left: -6px;
+        min-width: 20px;
+        height: 20px;
+        padding: 0 4px;
+        border-radius: 10px;
+        font-size: 0.7em;
+        font-weight: 600;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .card-badge.newborn { background: #6b8fbf; }
+    .card-badge.mature { background: #d4a017; }
 
-    /* 卡牌提示 */
     #card-tooltip {
         position: fixed;
         background: #333;
@@ -191,7 +222,6 @@ title: "迷你游戏"
         line-height: 1.6;
     }
 
-    /* 5 栏选择界面 */
     #spire-select {
         display: none;
         position: fixed;
@@ -204,7 +234,6 @@ title: "迷你游戏"
         justify-content: center;
     }
     #spire-select.active { display: flex; }
-
     .spire-select-panel {
         display: flex;
         width: 100%;
@@ -272,9 +301,7 @@ title: "迷你游戏"
         user-select: none;
         font-size: 0.95em;
     }
-    .spire-wheel-item:hover {
-        background: #f0f0f0;
-    }
+    .spire-wheel-item:hover { background: #f0f0f0; }
     .spire-wheel-item.selected {
         background: #333;
         color: #fff;
@@ -308,7 +335,6 @@ title: "迷你游戏"
         .spire-col-action { padding: 16px; }
     }
 
-    /* 抉择弹窗 */
     #choice-modal {
         display: none;
         position: fixed;
@@ -428,8 +454,9 @@ let nextCardUid = 1;
 let selectedCharKey = null;
 let selectedEnemyKey = null;
 
-const HAND_LIMIT = 8;
-const DRAW_PER_TURN = 5;
+const BASE_HAND_LIMIT = 8;
+const BASE_DRAW_PER_TURN = 5;
+const BASE_QUEUE_LIMIT = 4;
 
 /* ============================================
    工具
@@ -457,9 +484,12 @@ const isTouchOnly = window.matchMedia('(hover: none)').matches;
    ============================================ */
 function showCardTooltip(card, el) {
     const tip = document.getElementById('card-tooltip');
+    let extra = '';
+    if (card.states?.newborn) extra += '<br><span style="color:#9fc0e8;">[新生] 数值 -50%</span>';
+    if (card.states?.mature) extra += '<br><span style="color:#e8c060;">[成熟] 数值 +100%</span>';
     tip.innerHTML = `
         <div class="tip-name">${card.name}</div>
-        <div class="tip-desc">${card.description}</div>
+        <div class="tip-desc">${card.description}${extra}</div>
     `;
     tip.classList.add('active');
 
@@ -468,14 +498,11 @@ function showCardTooltip(card, el) {
 
     let left = rect.left + rect.width / 2 - tipRect.width / 2;
     let top = rect.top - tipRect.height - 8;
-
     if (left < 8) left = 8;
     if (left + tipRect.width > window.innerWidth - 8) {
         left = window.innerWidth - tipRect.width - 8;
     }
-    if (top < 8) {
-        top = rect.bottom + 8;
-    }
+    if (top < 8) top = rect.bottom + 8;
 
     tip.style.left = left + 'px';
     tip.style.top = top + 'px';
@@ -494,28 +521,26 @@ function makeCard(id) {
         ? Object.assign({}, base)
         : { id, name: '?', description: '', effects: [] };
     card.effects = card.effects.map(e => Object.assign({}, e));
+    card.states = {};
     card.uid = nextCardUid++;
     return card;
 }
 
 /* ============================================
-   特殊卡生成器注册表
+   特殊卡生成器
    ============================================ */
 const CARD_GENERATORS = {
     chase: () => ({
-        id: 'chase',
-        name: '追击',
+        id: 'chase', name: '追击',
         description: '造成 本回合攻击次数 × 倍率 的伤害。',
-        isSpecial: true,
+        isSpecial: true, states: {},
         effects: [{ type: 'specialDamage' }],
         uid: nextCardUid++
     }),
     fill: () => ({
-        id: 'fill',
-        name: '打1防1',
+        id: 'fill', name: '虚构',
         description: '造成 1 点伤害，获得 1 点格挡。',
-        isSpecial: true,
-        isFill: true,
+        isSpecial: true, isFill: true, states: {},
         effects: [
             { type: 'damage', value: 1 },
             { type: 'block', value: 1 }
@@ -523,11 +548,9 @@ const CARD_GENERATORS = {
         uid: nextCardUid++
     }),
     choice: () => ({
-        id: 'choice',
-        name: '抉择',
-        description: '打出时选择：攻击 6，或防御 5。',
-        isSpecial: true,
-        isChoice: true,
+        id: 'choice', name: '祈愿',
+        description: '抉择「造成 6 点伤害/获得 5 点格挡」。',
+        isSpecial: true, isChoice: true, states: {},
         effects: [],
         uid: nextCardUid++
     })
@@ -539,7 +562,7 @@ function generateCard(key) {
 }
 
 /* ============================================
-   通用追加卡牌被动
+   通用追加卡牌被动（insertCard）
    ============================================ */
 function runInsertCardPassive(trigger) {
     const passive = state.character?.passive;
@@ -547,14 +570,16 @@ function runInsertCardPassive(trigger) {
     if (passive.trigger !== trigger) return false;
     if (passive.oncePerTurn && state.passiveUsedThisTurn) return false;
 
-    const container = passive.target === 'hand' ? state.hand : state.queue;
+    const isHand = passive.target === 'hand';
+    const container = isHand ? state.hand : state.queue;
+    const limit = isHand ? state.handLimit : state.queueLimit;
     let inserted = 0;
 
     if (passive.count === 'fillToLimit') {
-        while (state.queue.length < state.queueLimit) {
+        while (container.length < limit) {
             const card = generateCard(passive.card);
             if (!card) break;
-            state.queue.push(card);
+            container.push(card);
             inserted++;
         }
     } else {
@@ -575,7 +600,44 @@ function runInsertCardPassive(trigger) {
 }
 
 /* ============================================
-   敌人意图池 / 队列填充
+   追刃（L）：结算前在队列末尾追加「追击」
+   ============================================ */
+function runAppendSpecialAttack() {
+    const passive = state.character?.passive;
+    if (passive?.type !== 'appendSpecialAttack') return false;
+    const card = generateCard('chase');
+    if (!card) return false;
+    state.queue.push(card);
+    log(`[${state.character.name}] 追加「追击」。`);
+    return true;
+}
+
+/* ============================================
+   熟成：卡牌状态乘数
+   ============================================ */
+function getCardStateMultiplier(card) {
+    if (!card?.states) return 1;
+    const passive = state.character?.passive;
+    if (passive?.type !== 'matureHand') return 1;
+    if (card.states.mature) return passive.matureMultiplier ?? 2;
+    if (card.states.newborn) return passive.newbornMultiplier ?? 0.5;
+    return 1;
+}
+
+/* ============================================
+   追击（specialDamage）默认配置
+   ============================================ */
+function makeDefaultSpecialAttackConfig(characterDef) {
+    const passive = characterDef?.passive;
+    const cfg = { perAttack: 3, flatBonus: 0, minDamage: 0, bonusAttacks: 0, extraEffects: [] };
+    if (passive?.type === 'appendSpecialAttack') {
+        cfg.perAttack = passive.damagePerAttack ?? cfg.perAttack;
+    }
+    return cfg;
+}
+
+/* ============================================
+   敌人意图池
    ============================================ */
 function rollEnemyIntentFromPool(pool) {
     const total = pool.reduce((s, e) => s + (e.weight || 1), 0);
@@ -595,34 +657,17 @@ function fillEnemyQueue(limit) {
     state.enemy.queue = [];
     const pool = state.enemy.intentPool;
     for (let i = 0; i < limit; i++) {
-        let intent = rollEnemyIntentFromPool(pool);
-        intent = applyEnemyPassiveToIntent(intent);
+        const intent = rollEnemyIntentFromPool(pool);
+        if (intent.type === 'attack') {
+            runEnemyPassive('modifyAttackIntent', intent);
+        }
         state.enemy.queue.push(intent);
     }
 }
 
-function applyEnemyPassiveToIntent(intent) {
-    const passive = state.enemy.passive;
-    if (!passive) return intent;
-
-    if (passive.type === 'fire_growth' && intent.type === 'attack') {
-        intent.value += state.enemy.attackGrowthStacks * (passive.value || 0);
-    }
-    if (passive.type === 'counter_strike' && intent.type === 'attack') {
-        const bonus = Math.floor(state.enemy.lastPlayerDamageTaken * (passive.ratio || 0));
-        intent.value += bonus;
-    }
-    if (passive.type === 'barrage' && intent.type === 'attack') {
-        intent.times = (intent.times || 1) + 1;
-    }
-    return intent;
-}
-
 function getDamageCapRemaining() {
-    const passive = state.enemy?.passive;
-    if (passive?.type !== 'damage_cap') return Infinity;
-    const cap = Math.floor(state.enemy.maxHp * passive.percent);
-    return Math.max(0, cap - state.enemy.damageTakenThisTurn);
+    const v = runEnemyPassive('getRemainingDamageCap');
+    return v === undefined ? Infinity : v;
 }
 
 /* ============================================
@@ -644,12 +689,15 @@ function onPlayerDealtHpDamage(state, amount) {
    ============================================ */
 const EFFECT_HANDLERS = {
     damage(state, effect) {
-        const baseDmg = effect.value || 0;
+        const mult = getCardStateMultiplier(state.resolvingCard);
+        const tempBonus = state.player.tempAttackBonus || 0;
+        const baseDmg = Math.floor((effect.value || 0) * mult) + tempBonus;
         const baseTimes = effect.times || 1;
 
-        const isK = state.character?.passive?.type === 'extraDamageRepeat';
+        const repeatPassive = state.character?.passive?.type === 'extraDamageRepeat'
+            ? state.character.passive : null;
         const isCombo = state.resolvingCard?.tags?.includes('combo');
-        const bonus = (isK && isCombo) ? (state.character.passive.value || 0) : 0;
+        const bonus = (repeatPassive && isCombo) ? (repeatPassive.value || 0) : 0;
         const times = baseTimes + bonus;
 
         let totalReal = 0;
@@ -676,16 +724,19 @@ const EFFECT_HANDLERS = {
     },
 
     lostHpDamage(state, effect) {
-        const flat = effect.flat || 0;
+        const mult = getCardStateMultiplier(state.resolvingCard);
+        const tempBonus = state.player.tempAttackBonus || 0;
+        const flat = Math.floor((effect.flat || 0) * mult);
         const pct = effect.lostHpPercent || 0;
         const lostHp = state.player.maxHp - state.player.hp;
         const variable = Math.floor(lostHp * pct);
-        const baseDmg = flat + variable;
+        const baseDmg = flat + variable + tempBonus;
         const baseTimes = effect.times || 1;
 
-        const isK = state.character?.passive?.type === 'extraDamageRepeat';
+        const repeatPassive = state.character?.passive?.type === 'extraDamageRepeat'
+            ? state.character.passive : null;
         const isCombo = state.resolvingCard?.tags?.includes('combo');
-        const bonus = (isK && isCombo) ? (state.character.passive.value || 0) : 0;
+        const bonus = (repeatPassive && isCombo) ? (repeatPassive.value || 0) : 0;
         const times = baseTimes + bonus;
 
         let totalReal = 0;
@@ -703,14 +754,15 @@ const EFFECT_HANDLERS = {
         }
         state.currentCardRealDamage += totalReal;
 
-        log(`造成 ${baseDmg} 点伤害（固定 ${flat} + 已损失 ${lostHp} × ${Math.round(pct*100)}% = ${variable}，真实 ${totalReal}，吸收 ${totalAbsorbed}）。`);
+        log(`造成 ${baseDmg} 点伤害（真实 ${totalReal}，吸收 ${totalAbsorbed}）。`);
         onPlayerDealtHpDamage(state, totalReal);
     },
 
     specialDamage(state, effect) {
         const cfg = state.specialAttackConfig;
         const effectiveAttacks = state.attacksThisTurn + cfg.bonusAttacks;
-        const dmg = effectiveAttacks * cfg.perAttack + cfg.flatBonus;
+        const tempBonus = state.player.tempAttackBonus || 0;
+        const dmg = effectiveAttacks * cfg.perAttack + cfg.flatBonus + tempBonus;
 
         const absorbed = Math.min(state.enemy.block, dmg);
         state.enemy.block -= absorbed;
@@ -747,7 +799,8 @@ const EFFECT_HANDLERS = {
     },
 
     block(state, effect) {
-        const v = effect.value || 0;
+        const mult = getCardStateMultiplier(state.resolvingCard);
+        const v = Math.floor((effect.value || 0) * mult);
         state.player.block = Math.min(state.player.maxHp, state.player.block + v);
         log(`获得 ${v} 点格挡。`);
     },
@@ -774,46 +827,123 @@ const EFFECT_HANDLERS = {
 
 /* ============================================
    敌人被动处理表
+   每个被动按 hook 声明；runEnemyPassive 返回 handler 结果
+   hook 一览：
+     modifyAttackIntent(state, passive, intent)       — 生成攻击意图时修改
+     onEnemyTurnStart(state, passive)                 — 敌人回合开始
+     onEnemyTurnEnd(state, passive)                   — 敌人行动结算完后
+     getPierceAmount(state, passive, attackValue)     — 返回穿盾值
+     onPlayerTakeRealDamage(state, passive, real)     — 玩家受到真实伤害时
+     getRemainingDamageCap(state, passive)            — 返回本回合剩余伤害上限
+     onPlayerAttackResolved(state, passive, real)     — 玩家单张攻击牌结算后
    ============================================ */
 const ENEMY_PASSIVE_HANDLERS = {
+    fire_growth: {
+        modifyAttackIntent(state, passive, intent) {
+            intent.value += state.enemy.attackGrowthStacks * (passive.value || 0);
+        },
+        onEnemyTurnEnd(state, passive) {
+            state.enemy.attackGrowthStacks += 1;
+        }
+    },
+    counter_strike: {
+        modifyAttackIntent(state, passive, intent) {
+            const bonus = Math.floor(state.enemy.lastPlayerDamageTaken * (passive.ratio || 0));
+            intent.value += bonus;
+        },
+        onEnemyTurnEnd(state, passive) {
+            state.enemy.lastPlayerDamageTaken = state.enemy.damageTakenThisTurn;
+        }
+    },
+    barrage: {
+        modifyAttackIntent(state, passive, intent) {
+            intent.times = (intent.times || 1) + 1;
+        }
+    },
+    pierce_block: {
+        getPierceAmount(state, passive, attackValue) {
+            return Math.min(passive.value, attackValue);
+        }
+    },
+    chill_player: {
+        onPlayerTakeRealDamage(state, passive, real) {
+            if (real <= 0) return;
+            const v = passive.value || 1;
+            if (state.player.queueLimitPenalty < v) {
+                state.player.queueLimitPenalty = v;
+                log(`[${state.enemyDef.name}] 你下回合出牌上限 -${v}。`);
+            }
+        }
+    },
+    damage_cap: {
+        getRemainingDamageCap(state, passive) {
+            const cap = Math.floor(state.enemy.maxHp * passive.percent);
+            return Math.max(0, cap - state.enemy.damageTakenThisTurn);
+        }
+    },
     regen: {
-        onTurnStart(state, passive) {
+        onEnemyTurnStart(state, passive) {
             const before = state.enemy.hp;
             state.enemy.hp = Math.min(state.enemy.maxHp, state.enemy.hp + passive.value);
             const gain = state.enemy.hp - before;
             if (gain > 0) log(`[${state.enemyDef.name}] 再生，回复 ${gain} HP。`);
         }
     },
-    thorns: {
-        onPlayerAttackResolved(state, passive, realDamage) {
-            if (realDamage <= 0) return;
-            state.player.hp = Math.max(0, state.player.hp - passive.value);
-            log(`[${state.enemyDef.name}] 荆棘，反弹 ${passive.value} 点伤害。`);
-        }
-    },
     shield_up: {
-        onTurnStart(state, passive) {
+        onEnemyTurnStart(state, passive) {
             state.enemy.block = Math.min(state.enemy.maxHp, state.enemy.block + passive.value);
             log(`[${state.enemyDef.name}] 获得 ${passive.value} 点格挡。`);
+        }
+    },
+    thorns: {
+        onPlayerAttackResolved(state, passive, real) {
+            if (real <= 0) return;
+            state.player.hp = Math.max(0, state.player.hp - passive.value);
+            log(`[${state.enemyDef.name}] 荆棘，反弹 ${passive.value} 点伤害。`);
         }
     }
 };
 
 function runEnemyPassive(hook, ...args) {
     const passive = state.enemy?.passive;
-    if (!passive) return;
+    if (!passive) return undefined;
     const handler = ENEMY_PASSIVE_HANDLERS[passive.type];
-    if (handler && handler[hook]) {
-        handler[hook](state, passive, ...args);
-    }
+    if (!handler || typeof handler[hook] !== 'function') return undefined;
+    return handler[hook](state, passive, ...args);
 }
 
+/* ============================================
+   手牌布局：不换行、居中、可重叠
+   ============================================ */
+const HAND_GAP = 8;          // 不重叠时的卡间距
+const HAND_MIN_STEP = 26;    // 重叠时每张卡最少露出的宽度
+function layoutHand() {
+    const handEl = document.getElementById('spire-hand');
+    if (!handEl) return;
+    const cards = handEl.querySelectorAll('.spire-card');
+    const n = cards.length;
+    if (n === 0) return;
+
+    const containerW = handEl.clientWidth;
+    const cardW = cards[0].getBoundingClientRect().width || 90;
+    const totalNeeded = n * cardW + (n - 1) * HAND_GAP;
+
+    if (totalNeeded <= containerW) {
+        cards.forEach(c => { c.style.marginLeft = ''; });
+        return;
+    }
+
+    const step = Math.max(HAND_MIN_STEP, (containerW - cardW) / (n - 1));
+    cards.forEach((c, i) => {
+        c.style.marginLeft = i === 0 ? '' : `${step - cardW}px`;
+    });
+}
 /* ============================================
    抽牌
    ============================================ */
 function drawToLimit(count) {
     let drawn = 0;
-    while (drawn < count && state.hand.length < HAND_LIMIT) {
+    while (drawn < count && state.hand.length < state.handLimit) {
         if (state.drawPile.length === 0) break;
         state.hand.push(state.drawPile.pop());
         drawn++;
@@ -821,12 +951,11 @@ function drawToLimit(count) {
 }
 
 /* ============================================
-   5 栏选择界面
+   选择界面
    ============================================ */
 function showCharacterSelect() {
     state = null;
     document.getElementById('spire-select').classList.add('active');
-
     buildCharWheel();
     buildEnemyWheel();
 
@@ -904,6 +1033,8 @@ function startBattle(characterKey, enemyKey) {
     const enemyDef = ENEMY_LIBRARY[enemyKey];
     if (!characterDef || !enemyDef) return;
 
+    const passive = characterDef.passive || {};
+
     state = {
         character: characterDef,
         characterKey: characterKey,
@@ -913,7 +1044,8 @@ function startBattle(characterKey, enemyKey) {
             hp: characterDef.maxHp,
             maxHp: characterDef.maxHp,
             block: 0,
-            queueLimitPenalty: 0
+            queueLimitPenalty: 0,
+            tempAttackBonus: 0
         },
         enemy: {
             hp: enemyDef.maxHp, maxHp: enemyDef.maxHp, block: 0,
@@ -931,20 +1063,16 @@ function startBattle(characterKey, enemyKey) {
         hand: [],
         playedPile: [],
         queue: [],
-        queueLimit: 4,
+        baseQueueLimit: BASE_QUEUE_LIMIT + (passive.queueLimitBonus || 0),
+        queueLimit: BASE_QUEUE_LIMIT + (passive.queueLimitBonus || 0),
+        handLimit: BASE_HAND_LIMIT + (passive.handLimitBonus || 0),
         turn: 1,
         phase: 'building',
         currentCardRealDamage: 0,
         attacksThisTurn: 0,
         passiveUsedThisTurn: false,
         snowballActive: false,
-        specialAttackConfig: {
-            perAttack: 3,
-            flatBonus: 0,
-            minDamage: 0,
-            bonusAttacks: 0,
-            extraEffects: []
-        },
+        specialAttackConfig: makeDefaultSpecialAttackConfig(characterDef),
         resolvingCard: null,
         resolvingCardUid: null,
         log: []
@@ -955,10 +1083,18 @@ function startBattle(characterKey, enemyKey) {
     const deck = characterDef.deck.map(id => makeCard(id));
     state.drawPile = shuffle(deck);
 
-    // 起手
-    drawToLimit(DRAW_PER_TURN);
+    let drawCount = BASE_DRAW_PER_TURN + (passive.drawBonus || 0) - (passive.drawPenalty || 0);
+    drawToLimit(drawCount);
 
-    // 开局也执行一次 turnStart 触发（B 的抉择）
+    // 熟成：初始手牌全部标记为新生
+    if (passive.type === 'matureHand') {
+        for (const card of state.hand) {
+            card.states = card.states || {};
+            card.states.newborn = true;
+        }
+    }
+
+    // 开局也执行 turnStart 触发（B 的抉择）
     runInsertCardPassive('turnStart');
 
     document.getElementById('spire-select').classList.remove('active');
@@ -978,7 +1114,6 @@ function playCardFromHand(index) {
     }
     const card = state.hand[index];
     if (!card) return;
-
     if (card.isChoice) {
         showChoiceModal(index);
         return;
@@ -995,9 +1130,7 @@ function doPlayCard(index) {
     state.queue.push(card);
     render();
 
-    if (sourceRect) {
-        animateCardFly(sourceRect, card.uid);
-    }
+    if (sourceRect) animateCardFly(sourceRect, card.uid);
 }
 
 function animateCardFly(sourceRect, uid) {
@@ -1011,15 +1144,9 @@ function animateCardFly(sourceRect, uid) {
     clone.className = 'spire-card';
     clone.innerHTML = `<div class="name">${card.name}</div>`;
     clone.style.cssText = `
-        position: fixed;
-        left: 0;
-        top: 0;
-        width: ${sourceRect.width}px;
-        height: ${sourceRect.height}px;
-        margin: 0;
-        box-sizing: border-box;
-        pointer-events: none;
-        z-index: 9999;
+        position: fixed; left: 0; top: 0;
+        width: ${sourceRect.width}px; height: ${sourceRect.height}px;
+        margin: 0; box-sizing: border-box; pointer-events: none; z-index: 9999;
         transform-origin: top left;
         transform: translate(${sourceRect.left}px, ${sourceRect.top}px) scale(1);
         transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
@@ -1027,15 +1154,11 @@ function animateCardFly(sourceRect, uid) {
     document.body.appendChild(clone);
     targetEl.style.visibility = 'hidden';
 
-    const scaleX = targetRect.width / sourceRect.width;
-    const scaleY = targetRect.height / sourceRect.height;
-    const scale = Math.min(scaleX, scaleY);
+    const scale = Math.min(targetRect.width / sourceRect.width, targetRect.height / sourceRect.height);
     const scaledW = sourceRect.width * scale;
     const scaledH = sourceRect.height * scale;
-    const targetCx = targetRect.left + targetRect.width / 2;
-    const targetCy = targetRect.top + targetRect.height / 2;
-    const finalX = targetCx - scaledW / 2;
-    const finalY = targetCy - scaledH / 2;
+    const finalX = (targetRect.left + targetRect.width / 2) - scaledW / 2;
+    const finalY = (targetRect.top + targetRect.height / 2) - scaledH / 2;
 
     requestAnimationFrame(() => {
         clone.style.transform = `translate(${finalX}px, ${finalY}px) scale(${scale})`;
@@ -1088,8 +1211,6 @@ function undoLastCard() {
     if (state.phase !== 'building') return;
     if (state.queue.length === 0) return;
     const card = state.queue.pop();
-
-    // 如果是抉择变成的，恢复成抉择
     if (card._wasChoice) {
         card.name = '抉择';
         card.description = '打出时选择：攻击 6，或防御 5。';
@@ -1097,7 +1218,6 @@ function undoLastCard() {
         card.isChoice = true;
         delete card._wasChoice;
     }
-
     const idx = card.handIndex;
     if (idx !== undefined && idx <= state.hand.length) {
         state.hand.splice(idx, 0, card);
@@ -1109,7 +1229,7 @@ function undoLastCard() {
 }
 
 /* ============================================
-   玩家队列结算（异步）
+   玩家队列结算
    ============================================ */
 async function resolveQueueAsync() {
     while (state.queue.length > 0) {
@@ -1145,12 +1265,11 @@ async function resolveQueueAsync() {
             }
         }
 
-        if (state.snowballActive && wasSnowball) {
-            applySnowballToQueue();
-        }
+        if (state.snowballActive && wasSnowball) applySnowballToQueue();
 
         state.queue.shift();
         if (!card.isSpecial) {
+            card.states = {};   // 打出后重置熟成状态，洗回牌堆后重新从「新生」开始
             state.playedPile.push(card);
         }
         state.resolvingCard = null;
@@ -1169,7 +1288,6 @@ async function resolveQueueAsync() {
             return;
         }
     }
-
     state.resolvingCard = null;
     state.resolvingCardUid = null;
 }
@@ -1184,16 +1302,43 @@ function applySnowballToQueue() {
             if (eff.type === 'block' && typeof eff.value === 'number') {
                 eff.value += 1;
             }
+            // specialDamage 的数值存于 specialAttackConfig，无法按“某一张牌”独立加成，
+            // 故不在此处处理。
         }
     }
 }
 
 /* ============================================
-   敌人回合（异步）
+   冒险：销毁所有手牌
+   ============================================ */
+function runAdventure() {
+    const passive = state.character?.passive;
+    if (passive?.type !== 'adventure') return;
+
+    let attackCount = 0;
+    let stateCount = 0;
+    for (const card of state.hand) {
+        if (card.tags?.includes('attack')) attackCount++;
+        else if (card.tags?.includes('buff')) stateCount++;
+    }
+    const total = state.hand.length;
+    state.hand = [];
+
+    const atkBonus = attackCount * (passive.attackBonusPerCard || 0);
+    const blkBonus = stateCount * (passive.blockPerCard || 0);
+
+    state.player.tempAttackBonus += atkBonus;
+    state.player.block = Math.min(state.player.maxHp, state.player.block + blkBonus);
+
+    log(`[冒险] 销毁了 ${total} 张手牌：攻击 +${atkBonus}，格挡 +${blkBonus}。`);
+}
+
+/* ============================================
+   敌人回合
    ============================================ */
 async function enemyActAllAsync() {
     state.enemy.block = 0;
-    runEnemyPassive('onTurnStart');
+    runEnemyPassive('onEnemyTurnStart');
     render();
     await sleep(300);
 
@@ -1205,10 +1350,7 @@ async function enemyActAllAsync() {
             const times = intent.times || 1;
             for (let t = 0; t < times; t++) {
                 if (state.player.hp <= 0) break;
-
-                const ep = state.enemy.passive;
-                const pierce = (ep?.type === 'pierce_block')
-                    ? Math.min(ep.value, intent.value) : 0;
+                const pierce = runEnemyPassive('getPierceAmount', intent.value) ?? 0;
                 const blockable = intent.value - pierce;
 
                 const absorbed = Math.min(state.player.block, blockable);
@@ -1224,14 +1366,7 @@ async function enemyActAllAsync() {
                     log(`敌人攻击，造成 ${real} 点伤害（格挡吸收 ${absorbed}）。`);
                 }
 
-                if (real > 0 && ep?.type === 'chill_player') {
-                    const v = ep.value || 1;
-                    if (state.player.queueLimitPenalty < v) {
-                        state.player.queueLimitPenalty = v;
-                        log(`[${state.enemyDef.name}] 你下回合出牌上限 -${v}。`);
-                    }
-                }
-
+                if (real > 0) runEnemyPassive('onPlayerTakeRealDamage', real);
                 render();
                 await sleep(500);
             }
@@ -1245,12 +1380,7 @@ async function enemyActAllAsync() {
 
     if (state.enemy.hp <= 0) return;
 
-    if (state.enemy.passive?.type === 'counter_strike') {
-        state.enemy.lastPlayerDamageTaken = state.enemy.damageTakenThisTurn;
-    }
-    if (state.enemy.passive?.type === 'fire_growth') {
-        state.enemy.attackGrowthStacks += 1;
-    }
+    runEnemyPassive('onEnemyTurnEnd');
 
     const penalty = state.enemy.nextQueueLimitPenalty;
     state.enemy.nextQueueLimitPenalty = 0;
@@ -1268,37 +1398,50 @@ async function enemyActAllAsync() {
 function startNewTurn() {
     state.turn++;
 
-    if (state.character?.passive?.type !== 'blockPersist') {
+    const passive = state.character?.passive;
+
+    if (passive?.type !== 'blockPersist') {
         state.player.block = 0;
     }
 
-    state.queueLimit = Math.max(0, 4 - (state.player.queueLimitPenalty || 0));
+    state.queueLimit = Math.max(0, state.baseQueueLimit - (state.player.queueLimitPenalty || 0));
     state.player.queueLimitPenalty = 0;
+    state.player.tempAttackBonus = 0;
     state.attacksThisTurn = 0;
     state.passiveUsedThisTurn = false;
     state.enemy.damageTakenThisTurn = 0;
     state.snowballActive = false;
-    state.specialAttackConfig = {
-        perAttack: 3,
-        flatBonus: 0,
-        minDamage: 0,
-        bonusAttacks: 0,
-        extraEffects: []
-    };
+    state.specialAttackConfig = makeDefaultSpecialAttackConfig(state.character);
 
-    // 洗回：抽牌堆 + 已打出区
+    // 熟成：新生 → 成熟
+    if (passive?.type === 'matureHand') {
+        for (const card of state.hand) {
+            if (card.states?.newborn) {
+                delete card.states.newborn;
+                card.states.mature = true;
+            }
+        }
+    }
+
+    // 洗回
     state.drawPile = shuffle(state.drawPile.concat(state.playedPile));
     state.playedPile = [];
 
     // 抽牌
-    let drawCount = DRAW_PER_TURN;
-    const passive = state.character?.passive;
-    if (passive?.type === 'insertCard' && passive.drawPenalty) {
-        drawCount -= passive.drawPenalty;
-    }
+    let drawCount = BASE_DRAW_PER_TURN + (passive?.drawBonus || 0) - (passive?.drawPenalty || 0);
     drawToLimit(drawCount);
 
-    // 通用追加：回合开始
+    // 熟成：新抽的牌标记为新生
+    if (passive?.type === 'matureHand') {
+        for (const card of state.hand) {
+            card.states = card.states || {};
+            if (!card.states.mature && !card.states.newborn) {
+                card.states.newborn = true;
+            }
+        }
+    }
+
+    // 通用追加：回合开始（B 的抉择）
     runInsertCardPassive('turnStart');
 }
 
@@ -1308,31 +1451,38 @@ function startNewTurn() {
 async function resolveAndEndTurn() {
     if (state.phase !== 'building') return;
 
-    // 出牌结束：手牌超上限销毁（优先特殊牌）
-    while (state.hand.length > HAND_LIMIT) {
+    // 出牌结束：手牌超上限销毁
+    while (state.hand.length > state.handLimit) {
         const specialIdx = state.hand.findIndex(c => c.isSpecial);
-        if (specialIdx >= 0) {
-            state.hand.splice(specialIdx, 1);
-        } else {
-            state.hand.pop();
-        }
+        if (specialIdx >= 0) state.hand.splice(specialIdx, 1);
+        else state.hand.pop();
     }
 
     state.phase = 'resolving';
     render();
     hideCardTooltip();
 
-    // 通用追加：结算前
+    // 冒险：销毁所有手牌
+    if (state.character?.passive?.type === 'adventure') {
+        runAdventure();
+        render();
+        await sleep(350);
+    }
+
+    // 通用追加：结算前（A）
     if (runInsertCardPassive('beforeResolve')) {
         render();
         await sleep(350);
     }
 
-    await resolveQueueAsync();
-    if (state.phase === 'gameover') {
+    // 追刃：结算前追加追击（L）
+    if (runAppendSpecialAttack()) {
         render();
-        return;
+        await sleep(350);
     }
+
+    await resolveQueueAsync();
+    if (state.phase === 'gameover') { render(); return; }
 
     await sleep(250);
     await enemyActAllAsync();
@@ -1406,6 +1556,19 @@ function render() {
         if (card.isSpecial) el.style.borderColor = '#e0a0a0';
         el.innerHTML = `<div class="name">${card.name}</div><div class="desc">${card.description}</div>`;
 
+        // 熟成标签
+        if (card.states?.newborn) {
+            const b = document.createElement('div');
+            b.className = 'card-badge newborn';
+            b.textContent = '新';
+            el.appendChild(b);
+        } else if (card.states?.mature) {
+            const b = document.createElement('div');
+            b.className = 'card-badge mature';
+            b.textContent = '熟';
+            el.appendChild(b);
+        }
+
         if (!isTouchOnly) {
             el.addEventListener('mouseenter', () => showCardTooltip(card, el));
             el.addEventListener('mouseleave', hideCardTooltip);
@@ -1442,6 +1605,9 @@ function render() {
         handEl.appendChild(el);
     });
 
+     // 手牌布局（不换行 + 重叠）
+    layoutHand();
+
     const logEl = document.getElementById('spire-log');
     logEl.innerHTML = state.log.slice(-40).map(l => `<div>${l}</div>`).join('');
     logEl.scrollTop = logEl.scrollHeight;
@@ -1455,12 +1621,8 @@ function render() {
 /* ============================================
    按钮绑定
    ============================================ */
-document.getElementById('resolve-btn').addEventListener('click', () => {
-    resolveAndEndTurn();
-});
-document.getElementById('undo-btn').addEventListener('click', () => {
-    undoLastCard();
-});
+document.getElementById('resolve-btn').addEventListener('click', () => resolveAndEndTurn());
+document.getElementById('undo-btn').addEventListener('click', () => undoLastCard());
 document.getElementById('restart-btn').addEventListener('click', () => {
     if (state && state.phase === 'resolving') return;
     document.getElementById('spire-log').innerHTML = '';
@@ -1470,6 +1632,11 @@ document.getElementById('start-battle-btn').addEventListener('click', () => {
     if (selectedCharKey && selectedEnemyKey) {
         startBattle(selectedCharKey, selectedEnemyKey);
     }
+});
+
+/* 窗口尺寸变化时重新布局手牌 */
+window.addEventListener('resize', () => {
+    if (state) layoutHand();
 });
 
 /* ============================================
