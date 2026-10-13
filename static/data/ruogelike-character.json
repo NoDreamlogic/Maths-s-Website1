@@ -48,7 +48,7 @@
                      "count": "fillToLimit", "target": "queue" },
         "deck": ["strike", "strike", "strike", "strike_one", "strike_one",
                  "defend", "defend", "defend", "defend",
-                 "strike_two", "snowball"]
+                 "strike_two", "snowball", "echo", "chant"]
     },
     "B": {
         "id": "B",
@@ -88,7 +88,7 @@
     "Adventure": {
         "id": "Adventure",
         "name": "冒险",
-        "description": "开始行动前销毁所有手牌。每销毁一张攻击牌，本回合所有攻击 +2 伤害；每销毁一张状态牌，获得 3 点格挡。",
+        "description": "开始行动前弃置所有手牌。每弃置一张攻击牌，本回合所有攻击 +2 伤害；每弃置一张增益牌，获得 3 点格挡。",
         "maxHp": 80,
         "passive": {
             "type": "adventure",
@@ -112,6 +112,6 @@
         },
         "deck": ["strike", "strike", "strike", "strike_one", "strike_one",
                  "defend", "defend", "defend", "defend",
-                 "strike_two"]
+                 "strike_two","ignite"]
     }
 }

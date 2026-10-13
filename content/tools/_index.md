@@ -150,7 +150,8 @@ title: "小工具们"
 <div class="tool-card" data-tool="random">遵从骰子之意</div>
 <div class="tool-card" data-tool="guess">猜数字</div>
 <a href="/tools/minesweeper/" class="tool-card" data-bg="minesweeper">雷区扫荡</a>
-<a href="/tools/ruogelike/" class="tool-card" data-bg="ruogelike">迷你游戏</a>
+<a href="/tools/ruogelike/" class="tool-card" data-bg="ruogelike">我爱打牌</a>
+<a href="/tools/sudoku/" class="tool-card" data-bg="sudoku">我爱打牌</a>
 </div>
 </div>
 

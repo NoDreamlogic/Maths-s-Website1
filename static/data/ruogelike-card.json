@@ -37,7 +37,7 @@
     "snowball": {
         "id": "snowball",
         "name": "渐强",
-        "description": "对此牌及之后的牌施加一个效果，持有此效果的卡在被使用时额外使位于其之后的卡的部分数值获得+1。",
+        "description": "结算时，令行动序列中当时剩余的每张牌数值 +1。",
         "tags": ["buff"],
         "effects": [{ "type": "snowball" }]
     },
@@ -61,5 +61,36 @@
         "description": "使追击额外计入 2 次攻击。",
         "tags": ["buff", "chase"],
         "effects": [{ "type": "buffSpecialAttack", "bonusAttacksDelta": 2 }]
+    },
+    "echo": {
+        "id": "echo",
+        "name": "攻击·回响",
+        "description": "造成 5 点伤害。若此牌在开始行动时位于队列第 1 位，在队列末尾插入一张复制的「攻击·回响」。",
+        "tags": ["attack"],
+        "effects": [
+            { "type": "damage", "value": 5 },
+            { "type": "insertCopyAtEnd", "requirePosition": 1 }
+        ]
+    },
+    "chant": {
+        "id": "chant",
+        "name": "吟诵",
+        "description": "移除队列中剩下的所有牌。每移除一张攻击牌，获得 2 点攻击（持续 2 回合）；每移除一张增益牌，获得 3 点格挡。下回合开始行动时，在队尾插入一张「吟诵攻击」。",
+        "tags": ["buff"],
+        "effects": [{ "type": "chantClear" }]
+    },
+    "cycle": {
+        "id": "cycle",
+        "name": "轮回",
+        "description": "弃置所有手牌，然后抽等量的牌。",
+        "tags": ["buff"],
+        "effects": [{ "type": "discardHandAndDraw" }]
+    },
+    "ignite": {
+        "id": "ignite",
+        "name": "引燃",
+        "description": "造成 4 点伤害。抉择「是/否」选择激活一条敌方词条并额外造成 4 点伤害。",
+        "tags": ["attack"],
+        "effects": [{ "type": "damage", "value": 4 }]
     }
 }

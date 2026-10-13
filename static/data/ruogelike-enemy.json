@@ -6,6 +6,12 @@
         "maxHp": 80,
         "queueLimit": 2,
         "passive": { "type": "fire_growth", "value": 1 },
+        "traits": [
+            { "id": "rage", "name": "恶化", "description": "为什么情况比之前更糟了？",
+              "passive": { "type": "flat_attack", "value": 3 } },
+            { "id": "ash", "name": "气流", "description": "火焰环绕其身旁……我们需要更有效的攻击。",
+              "passive": { "type": "shield_up", "value": 5 } }
+        ],
         "intentPool": [
             { "weight": 70, "type": "attack", "value": 6 },
             { "weight": 30, "type": "buff", "value": 5 }
@@ -18,6 +24,12 @@
         "maxHp": 80,
         "queueLimit": 2,
         "passive": { "type": "counter_strike", "ratio": 0.4 },
+        "traits": [
+            { "id": "wall", "name": "铁壁", "description": "传统的格挡术，行之有效。",
+              "passive": { "type": "shield_up", "value": 5 } },
+            { "id": "counter", "name": "化劲", "description": "呃啊……你虽然命中了，但也确实地当场就被回击了。",
+              "passive": { "type": "thorns", "value": 3 } }
+        ],
         "intentPool": [
             { "weight": 55, "type": "attack", "value": 8 },
             { "weight": 25, "type": "attack", "value": 5 },
@@ -31,6 +43,12 @@
         "maxHp": 80,
         "queueLimit": 2,
         "passive": { "type": "barrage" },
+        "traits": [
+            { "id": "scatter", "name": "华丽", "description": "致眩目的华丽之物。",
+              "passive": { "type": "barrage" } },
+            { "id": "load", "name": "快速", "description": "你感觉他的动作变得狠厉了。",
+              "passive": { "type": "flat_attack", "value": 2 } }
+        ],
         "intentPool": [
             { "weight": 50, "type": "attack", "value": 4, "times": 2 },
             { "weight": 30, "type": "attack", "value": 8 },
@@ -43,6 +61,12 @@
         "description": "极为迅捷的动作使得其可以额外行动。",
         "maxHp": 80,
         "queueLimit": 3,
+        "traits": [
+            { "id": "haste", "name": "疾行", "description": "你几乎已经跟不上他了。",
+              "passive": { "type": "extra_action", "value": 1 } },
+            { "id": "sharp", "name": "锐利", "description": "即使风本身也在助长它的威力。",
+              "passive": { "type": "flat_attack", "value": 2 } }
+        ],
         "intentPool": [
             { "weight": 60, "type": "attack", "value": 8 },
             { "weight": 40, "type": "buff", "value": 5 }
@@ -55,6 +79,12 @@
         "maxHp": 80,
         "queueLimit": 2,
         "passive": { "type": "pierce_block", "value": 2 },
+        "traits": [
+            { "id": "deep", "name": "扩散", "description": "更难挡住了啊。",
+              "passive": { "type": "pierce_block", "value": 2 } },
+            { "id": "frost", "name": "双色", "description": "为什么他也会冰冻了？！",
+              "passive": { "type": "chill_player", "value": 1 } }
+        ],
         "intentPool": [
             { "weight": 60, "type": "attack", "value": 8 },
             { "weight": 40, "type": "buff", "value": 5 }
@@ -67,6 +97,12 @@
         "maxHp": 80,
         "queueLimit": 2,
         "passive": { "type": "chill_player", "value": 1 },
+        "traits": [
+            { "id": "frostbite", "name": "霜寒", "description": "你的动作确实变迟缓了……这不是错觉。",
+              "passive": { "type": "draw_penalty", "value": 1 } },
+            { "id": "ice", "name": "冰封", "description": "就连行为本身也被封冻。",
+              "passive": { "type": "chill_player", "value": 1 } }
+        ],
         "intentPool": [
             { "weight": 60, "type": "attack", "value": 8 },
             { "weight": 40, "type": "buff", "value": 5 }
@@ -79,6 +115,12 @@
         "maxHp": 80,
         "queueLimit": 2,
         "passive": { "type": "damage_cap", "percent": 0.25 },
+        "traits": [
+            { "id": "echo", "name": "回响", "description": "它怎么会自主回复的？！",
+              "passive": { "type": "regen", "value": 3 } },
+            { "id": "void", "name": "虚空", "description": "你也无法推断它的意图。",
+              "passive": { "type": "hide_intent" } }
+        ],
         "intentPool": [
             { "weight": 60, "type": "attack", "value": 8 },
             { "weight": 40, "type": "buff", "value": 5 }
