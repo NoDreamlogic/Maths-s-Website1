@@ -1,0 +1,62 @@
+[
+    {
+        "term": "行动序列",
+        "pinyin": "xingdongxulie",
+        "abbr": "xdxl",
+        "def": "你本回合即将进行的行动，使用手牌来填充它。"
+    },
+    {
+        "term": "连击",
+        "pinyin": "lianji",
+        "abbr": "lj",
+        "def": "对行为的执行次数的描述。"
+    },
+    {
+        "term": "交换",
+        "pinyin": "jiaohuan",
+        "abbr": "jh",
+        "def": "从抽牌堆抽一定量的手牌，然后弃置等量牌。"
+    },
+    {
+        "term": "特殊牌",
+        "pinyin": "teshupai",
+        "abbr": "tsp",
+        "def": "不存在于牌组中、由效果生成的牌。打出后不会进入弃牌堆。"
+    },
+    {
+        "term": "新生",
+        "pinyin": "xinsheng",
+        "abbr": "xs",
+        "def": "此标签使牌获得 数值-50%。"
+    },
+    {
+        "term": "成熟",
+        "pinyin": "chengshu",
+        "abbr": "cs",
+        "def": "此标签使牌获得 数值+100%。"
+    },
+    {
+        "term": "霜冻",
+        "pinyin": "shuangdong",
+        "abbr": "sd",
+        "def": "敌人下回合行动上限 -1，效果不叠加。"
+    },
+    {
+        "term": "位次",
+        "pinyin": "weici",
+        "abbr": "wc",
+        "def": "卡牌在队列中的位置。"
+    },
+    {
+        "term": "渐强",
+        "pinyin": "jianqiang",
+        "abbr": "jq",
+        "def": "此标签使牌结算时，使行动序列中剩下的牌获得数值+1。"
+    },
+    {
+        "term": "穿透",
+        "pinyin": "chuantou",
+        "abbr": "ct",
+        "def": "无视格挡直接造成伤害的数值。"
+    }
+]

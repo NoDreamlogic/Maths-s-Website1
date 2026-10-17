@@ -3,6 +3,153 @@ title: "数独"
 ---
 
 <style>
+    /* ===== 暗色模式 ===== */
+    html.dark .sudoku-btn,
+    html.night .sudoku-btn,
+    html.dark-mode .sudoku-btn,
+    html[data-theme="dark"] .sudoku-btn,
+    body.dark .sudoku-btn,
+    body.night .sudoku-btn,
+    body.dark-mode .sudoku-btn {
+        color: #bbb;
+        border-color: #444;
+    }
+    html.dark .sudoku-btn:hover,
+    html.night .sudoku-btn:hover,
+    html.dark-mode .sudoku-btn:hover,
+    html[data-theme="dark"] .sudoku-btn:hover,
+    body.dark .sudoku-btn:hover,
+    body.night .sudoku-btn:hover,
+    body.dark-mode .sudoku-btn:hover {
+        color: #fff;
+        border-color: #888;
+    }
+    html.dark .sudoku-btn.active,
+    html.night .sudoku-btn.active,
+    html.dark-mode .sudoku-btn.active,
+    html[data-theme="dark"] .sudoku-btn.active,
+    body.dark .sudoku-btn.active,
+    body.night .sudoku-btn.active,
+    body.dark-mode .sudoku-btn.active {
+        background: #eee;
+        color: #222;
+        border-color: #eee;
+    }
+
+    html.dark #sudoku-board,
+    html.night #sudoku-board,
+    html.dark-mode #sudoku-board,
+    html[data-theme="dark"] #sudoku-board,
+    body.dark #sudoku-board,
+    body.night #sudoku-board,
+    body.dark-mode #sudoku-board {
+        border-color: #888;
+    }
+    html.dark .sudoku-cell,
+    html.night .sudoku-cell,
+    html.dark-mode .sudoku-cell,
+    html[data-theme="dark"] .sudoku-cell,
+    body.dark .sudoku-cell,
+    body.night .sudoku-cell,
+    body.dark-mode .sudoku-cell {
+        border-right-color: #3a3a3a;
+        border-bottom-color: #3a3a3a;
+        color: #7aa7ff;
+    }
+    html.dark .sudoku-cell.br,
+    html.night .sudoku-cell.br,
+    html.dark-mode .sudoku-cell.br,
+    html[data-theme="dark"] .sudoku-cell.br,
+    body.dark .sudoku-cell.br,
+    body.night .sudoku-cell.br,
+    body.dark-mode .sudoku-cell.br {
+        border-right-color: #888;
+    }
+    html.dark .sudoku-cell.bb,
+    html.night .sudoku-cell.bb,
+    html.dark-mode .sudoku-cell.bb,
+    html[data-theme="dark"] .sudoku-cell.bb,
+    body.dark .sudoku-cell.bb,
+    body.night .sudoku-cell.bb,
+    body.dark-mode .sudoku-cell.bb {
+        border-bottom-color: #888;
+    }
+    html.dark .sudoku-cell.given,
+    html.night .sudoku-cell.given,
+    html.dark-mode .sudoku-cell.given,
+    html[data-theme="dark"] .sudoku-cell.given,
+    body.dark .sudoku-cell.given,
+    body.night .sudoku-cell.given,
+    body.dark-mode .sudoku-cell.given {
+        color: #eee;
+    }
+    html.dark .sudoku-cell.selected,
+    html.night .sudoku-cell.selected,
+    html.dark-mode .sudoku-cell.selected,
+    html[data-theme="dark"] .sudoku-cell.selected,
+    body.dark .sudoku-cell.selected,
+    body.night .sudoku-cell.selected,
+    body.dark-mode .sudoku-cell.selected {
+        background: #3a4a6a;
+    }
+    html.dark .sudoku-cell.highlighted,
+    html.night .sudoku-cell.highlighted,
+    html.dark-mode .sudoku-cell.highlighted,
+    html[data-theme="dark"] .sudoku-cell.highlighted,
+    body.dark .sudoku-cell.highlighted,
+    body.night .sudoku-cell.highlighted,
+    body.dark-mode .sudoku-cell.highlighted {
+        background: #2a2a2a;
+    }
+    html.dark .sudoku-cell.selected.highlighted,
+    html.night .sudoku-cell.selected.highlighted,
+    html.dark-mode .sudoku-cell.selected.highlighted,
+    html[data-theme="dark"] .sudoku-cell.selected.highlighted,
+    body.dark .sudoku-cell.selected.highlighted,
+    body.night .sudoku-cell.selected.highlighted,
+    body.dark-mode .sudoku-cell.selected.highlighted {
+        background: #3a4a6a;
+    }
+    html.dark .sudoku-cell.conflict,
+    html.night .sudoku-cell.conflict,
+    html.dark-mode .sudoku-cell.conflict,
+    html[data-theme="dark"] .sudoku-cell.conflict,
+    body.dark .sudoku-cell.conflict,
+    body.night .sudoku-cell.conflict,
+    body.dark-mode .sudoku-cell.conflict {
+        color: #ff6b6b;
+    }
+
+    html.dark .sudoku-num,
+    html.night .sudoku-num,
+    html.dark-mode .sudoku-num,
+    html[data-theme="dark"] .sudoku-num,
+    body.dark .sudoku-num,
+    body.night .sudoku-num,
+    body.dark-mode .sudoku-num {
+        color: #ddd;
+        border-color: #444;
+    }
+    html.dark .sudoku-num:hover,
+    html.night .sudoku-num:hover,
+    html.dark-mode .sudoku-num:hover,
+    html[data-theme="dark"] .sudoku-num:hover,
+    body.dark .sudoku-num:hover,
+    body.night .sudoku-num:hover,
+    body.dark-mode .sudoku-num:hover {
+        border-color: #888;
+        background: #2a2a2a;
+    }
+
+    html.dark #sudoku-status,
+    html.night #sudoku-status,
+    html.dark-mode #sudoku-status,
+    html[data-theme="dark"] #sudoku-status,
+    body.dark #sudoku-status,
+    body.night #sudoku-status,
+    body.dark-mode #sudoku-status {
+        color: #888;
+    }
     #sudoku-page {
         max-width: 560px;
         margin: 0 auto;

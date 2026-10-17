@@ -31,13 +31,22 @@
     },
     "Snowy": {
         "id": "Snowy",
-        "name": "冷冻",
-        "description": "造成伤害时，使目标下回合行动序列最大长度 -1（不叠加）。",
+        "name": "雪玩偶",
+        "description": "造成伤害时，使目标获得 1 回合 霜冻 。",
         "maxHp": 80,
-        "passive": { "type": "reduceEnemyQueueLimit", "value": 1 },
-        "deck": ["strike", "strike", "strike", "strike_one", "strike_one",
-                 "defend", "defend", "defend", "defend",
-                 "strike_two"]
+        "passive": { "type": "applyFrostOnHpDamage", "value": 1 },
+        "deck": [
+            "strike", "strike", "strike", "strike", "strike", "strike",
+            "defend", "defend", "defend", "defend", "defend", "defend",
+            "snow_spike", "snow_spike", "snow_spike", "snow_spike",
+            "cold_wind", "cold_wind", "cold_wind", "cold_wind",
+            "cold_wave", "cold_wave", "cold_wave",
+            "invasion", "invasion", "invasion",
+            "snow_melt", "snow_melt",
+            "mental_freeze", "mental_freeze",
+            "long_winter_night",
+            "glacier_burst"
+        ]
     },
     "A": {
         "id": "A",
@@ -112,6 +121,6 @@
         },
         "deck": ["strike", "strike", "strike", "strike_one", "strike_one",
                  "defend", "defend", "defend", "defend",
-                 "strike_two","ignite"]
+                 "strike_two"]
     }
 }

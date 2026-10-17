@@ -64,8 +64,8 @@
     },
     "echo": {
         "id": "echo",
-        "name": "攻击·回响",
-        "description": "造成 5 点伤害。若此牌在开始行动时位于队列第 1 位，在队列末尾插入一张复制的「攻击·回响」。",
+        "name": "余音",
+        "description": "造成 5 点伤害。若此牌在开始行动时位于队列第 1 位，在队列末尾插入一张「余音·残响」。",
         "tags": ["attack"],
         "effects": [
             { "type": "damage", "value": 5 },
@@ -89,8 +89,70 @@
     "ignite": {
         "id": "ignite",
         "name": "引燃",
-        "description": "造成 4 点伤害。抉择「是/否」选择激活一条敌方词条并额外造成 4 点伤害。",
+        "description": "造成 4 点伤害。若敌人有未激活的词条，可选择激活一条，并额外造成 4 点伤害。",
         "tags": ["attack"],
         "effects": [{ "type": "damage", "value": 4 }]
+    },
+    "snow_spike": {
+        "id": "snow_spike",
+        "name": "刺骨",
+        "description": "造成 5 点伤害，本次攻击获得 2 点穿透。",
+        "tags": ["attack"],
+        "effects": [{ "type": "damageWithPierce", "value": 5, "pierce": 2 }]
+    },
+    "cold_wind": {
+        "id": "cold_wind",
+        "name": "冷风",
+        "description": "造成 3 点伤害，使目标获得 2 回合霜冻。",
+        "tags": ["attack"],
+        "effects": [
+            { "type": "damage", "value": 3 },
+            { "type": "applyFrost", "value": 2 }
+        ]
+    },
+    "cold_wave": {
+        "id": "cold_wave",
+        "name": "寒潮",
+        "description": "使目标的霜冻延长 2 回合。",
+        "tags": ["buff"],
+        "effects": [{ "type": "extendFrost", "value": 2 }]
+    },
+    "invasion": {
+        "id": "invasion",
+        "name": "侵袭",
+        "description": "赋予队列中攻击类卡片 降温 。",
+        "tags": ["buff"],
+        "effects": [{ "type": "tagQueueAttacks" }]
+    },
+    "snow_melt": {
+        "id": "snow_melt",
+        "name": "雪融之时",
+        "description": "交换 2。若敌方霜冻持续时间大于 3 回合，改为弃置 2 张手牌并检索 2 张牌。",
+        "tags": ["buff"],
+        "effects": [{ "type": "conditionalExchange", "count": 2, "threshold": 3 }]
+    },
+    "mental_freeze": {
+        "id": "mental_freeze",
+        "name": "思维冷冻",
+        "description": "使目标攻击和格挡降低 2，持续 2 回合；目标每有 1 回合霜冻，额外降低 1。",
+        "tags": ["buff"],
+        "effects": [{ "type": "applyStatDown", "value": 2, "turns": 2, "perFrost": 1 }]
+    },
+    "long_winter_night": {
+        "id": "long_winter_night",
+        "name": "冬夜漫长",
+        "description": "造成 8 点伤害；目标每有 1 回合霜冻，伤害 +3。",
+        "tags": ["attack"],
+        "effects": [{ "type": "damagePerFrost", "base": 8, "perFrost": 3 }]
+    },
+    "glacier_burst": {
+        "id": "glacier_burst",
+        "name": "冰川破裂",
+        "description": "造成 5 点伤害，0 连击；目标每有 1 回合霜冻，此牌连击数 +1。造成伤害后，解除目标的霜冻。",
+        "tags": ["attack"],
+        "effects": [
+            { "type": "damageComboPerFrost", "baseValue": 5, "perFrost": 1, "baseTimes": 0 },
+            { "type": "removeFrost" }
+        ]
     }
 }
