@@ -82,6 +82,8 @@ title: "扫雷"
         cursor: default;
     }
     .mine-cell.revealed:hover { background: #f5f5f5; }
+    .mine-cell.revealed.number { cursor: pointer; }
+    .mine-cell.revealed.number:hover { background: #ececec; }
     .mine-cell.mine { background: #ffdddd; }
     .mine-cell.n1 { color: #1976d2; }
     .mine-cell.n2 { color: #388e3c; }
@@ -124,7 +126,7 @@ title: "扫雷"
 
 <div id="minesweeper-board"></div>
 
-<p class="mine-help">左键翻开，右键标记旗子。翻开所有非雷格子即胜利。</p>
+<p class="mine-help">左键翻开，右键标记旗子。点击已翻开的数字，若周围旗数等于该数字，会翻开周围其余格子。</p>
 </div>
 
 <script>
@@ -248,8 +250,51 @@ title: "扫雷"
         return true;
     }
 
+    function countAdjacentFlags(r, c) {
+        let count = 0;
+        for (let dr = -1; dr <= 1; dr++) {
+            for (let dc = -1; dc <= 1; dc++) {
+                if (dr === 0 && dc === 0) continue;
+                const nr = r + dr, nc = c + dc;
+                if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS && flagged[nr][nc]) count++;
+            }
+        }
+        return count;
+    }
+
+    // 点击已翻开的数字：若周围旗数等于该数字，翻开周围所有未插旗的格子
+    function chord(r, c) {
+        if (gameOver) return;
+        if (!revealed[r][c]) return;
+        if (board[r][c] <= 0) return;
+        if (countAdjacentFlags(r, c) !== board[r][c]) return;
+
+        for (let dr = -1; dr <= 1; dr++) {
+            for (let dc = -1; dc <= 1; dc++) {
+                if (dr === 0 && dc === 0) continue;
+                const nr = r + dr, nc = c + dc;
+                if (nr < 0 || nr >= ROWS || nc < 0 || nc >= COLS) continue;
+                if (flagged[nr][nc] || revealed[nr][nc]) continue;
+                reveal(nr, nc);
+                if (gameOver) break;
+            }
+            if (gameOver) break;
+        }
+
+        if (!gameOver && checkWin()) {
+            gameOver = true;
+            statusEl.textContent = '胜利！';
+        }
+        render();
+    }
+
     function handleClick(r, c) {
-        if (gameOver || flagged[r][c]) return;
+        if (gameOver) return;
+        if (revealed[r][c]) {
+            chord(r, c);
+            return;
+        }
+        if (flagged[r][c]) return;
         if (firstClick) {
             firstClick = false;
             placeMines(r, c);
@@ -286,6 +331,7 @@ title: "扫雷"
                     } else if (board[r][c] > 0) {
                         cell.textContent = board[r][c];
                         cell.classList.add('n' + board[r][c]);
+                        cell.classList.add('number');
                     }
                 } else if (flagged[r][c]) {
                     cell.textContent = '🚩';

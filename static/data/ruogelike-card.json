@@ -1,158 +1,59 @@
 {
-    "strike": {
-        "id": "strike",
-        "name": "攻击",
-        "description": "造成 6 点伤害。",
+    "strike": { "id": "strike", "name": "攻击", "description": "造成 6 点伤害。", "tags": ["attack"], "effects": [{ "type": "damage", "value": 6 }] },
+    "defend": { "id": "defend", "name": "防御", "description": "获得 5 点格挡。", "tags": ["buff"], "effects": [{ "type": "block", "value": 5 }] },
+    "strike_one": { "id": "strike_one", "name": "连击", "description": "造成 5 点伤害，1 连击。", "tags": ["attack", "combo"], "effects": [{ "type": "damage", "value": 5, "times": 1 }] },
+    "strike_two": { "id": "strike_two", "name": "二连击", "description": "造成 4 点伤害，2 连击。", "tags": ["attack", "combo"], "effects": [{ "type": "damage", "value": 4, "times": 2 }] },
+    "strike_blood": { "id": "strike_blood", "name": "反攻", "description": "造成 5+40%已损体力值 点伤害。", "tags": ["attack"], "effects": [{ "type": "lostHpDamage", "flat": 5, "lostHpPercent": 0.4 }] },
+    
+    "snowball": { "id": "snowball", "name": "渐强", "description": "结算时，令行动序列中当时剩余的每张牌数值 +1。", "tags": ["buff"], "effects": [{ "type": "snowball" }] },
+    "echo": { "id": "echo", "name": "余音", "description": "造成 5 点伤害。若此牌在开始行动时位于队列第 1 位，在队列末尾插入一张「余音·残响」。", "tags": ["attack"], "effects": [{ "type": "damage", "value": 5 }, { "type": "insertCopyAtEnd", "requirePosition": 1 }] },
+    "chant": { "id": "chant", "name": "吟诵", "description": "移除队列中剩下的所有牌。每移除一张攻击牌，获得 2 点攻击（持续 2 回合）；每移除一张增益牌，获得 3 点格挡。下回合开始行动时，在队尾插入一张「吟诵攻击」。", "tags": ["buff"], "effects": [{ "type": "chantClear" }] },
+    "ignite": { "id": "ignite", "name": "引燃", "description": "造成 4 点伤害。若敌人有未激活的词条，可选择激活一条，并额外造成 4 点伤害。", "tags": ["attack"], "effects": [{ "type": "damage", "value": 4 }] },
+
+    "ice_spike": { "id": "ice_spike", "name": "刺骨", "description": "造成 5 点伤害，其中 2 点无视格挡。", "tags": ["attack"], "effects": [{ "type": "damageWithPierce", "value": 5, "pierce": 2 }] },
+    "cold_wind": { "id": "cold_wind", "name": "冷风", "description": "造成 2 点伤害，使目标获得 2 回合霜冻。", "tags": ["attack"], "effects": [{ "type": "damage", "value": 2 }, { "type": "applyFrost", "value": 2 }] },
+    "cold_wave": { "id": "cold_wave", "name": "寒潮", "description": "使目标的霜冻延长 2 回合。", "tags": ["buff"], "effects": [{ "type": "extendFrost", "value": 2 }] },
+    "invasion": { "id": "invasion", "name": "侵袭", "description": "赋予队列中攻击类卡片标签，使它们施加霜冻时改为延长已有霜冻等长的时间。", "tags": ["buff"], "effects": [{ "type": "tagQueueAttacks" }] },
+    "snow_melt": { "id": "snow_melt", "name": "雪融之时", "description": "交换 2。若敌方霜冻持续时间大于 3 回合，改为弃置 2 张手牌并检索 2 张牌。", "tags": ["buff"], "effects": [{ "type": "conditionalExchange", "count": 2, "threshold": 3 }] },
+    "mental_freeze": { "id": "mental_freeze", "name": "思维冷冻", "description": "使目标攻击和格挡降低 2，持续 2 回合；目标每有 1 回合霜冻，额外降低 1。", "tags": ["buff"], "effects": [{ "type": "applyStatDown", "value": 2, "turns": 2, "perFrost": 1 }] },
+    "long_winter_night": { "id": "long_winter_night", "name": "冬夜漫长", "description": "造成 8 点伤害；目标每有 1 回合霜冻，伤害 +3。", "tags": ["attack"], "effects": [{ "type": "damagePerFrost", "base": 8, "perFrost": 3 }] },
+    "glacier_burst": { "id": "glacier_burst", "name": "冰川破裂", "description": "造成 5 点伤害，0 连击；目标每有 1 回合霜冻，此牌连击数 +1。造成伤害后，解除目标的霜冻。", "tags": ["attack"], "effects": [{ "type": "damageComboPerFrost", "baseValue": 5, "perFrost": 1, "baseTimes": 0 }, { "type": "removeFrost" }] },
+
+    "debug_atk": { "id": "debug_atk", "name": "调试：攻击力", "description": "抽 1 张牌。使追击获得攻击力+1，持续 1 回合。", "tags": ["buff", "debug"], "effects": [{ "type": "debugPower", "pAtk": 1, "pDbg": 1 }, { "type": "discardHandAndDraw" }] },
+    "debug_times": { "id": "debug_times", "name": "调试：攻击次数", "description": "抽 1 张牌。使追击获得 连击数 + 1 ，持续 3 回合。", "tags": ["buff", "debug"], "effects": [{ "type": "debugTimes", "value": 1, "turns": 3 }, { "type": "discardHandAndDraw" }] },
+    "debug_pierce": { "id": "debug_pierce", "name": "调试：穿透", "description": "抽 1 张牌。使追击获得 2 点穿透，持续 3 回合。", "tags": ["buff", "debug"], "effects": [{ "type": "debugPierce", "value": 2, "turns": 3 }, { "type": "discardHandAndDraw" }] },
+    "debug_vuln": { "id": "debug_vuln", "name": "调试：状态施加", "description": "抽 1 张牌。使追击附带 1 级伤口，持续 3 回合。", "tags": ["buff", "debug"], "effects": [{ "type": "debugVuln", "value": 1, "turns": 3 }, { "type": "discardHandAndDraw" }] },
+    "debug_weak": {
+    "id": "debug_weak", "name": "调试：属性削弱",
+    "description": "抽 1 张牌。使追击使目标攻击和格挡降低 2，持续 2 回合。",
+    "tags": ["buff", "debug"],
+    "effects": [{ "type": "debugWeak", "value": 2, "turns": 2 }, { "type": "discardHandAndDraw" }]
+},
+    "debug_block": {
+    "id": "debug_block", "name": "调试：格挡附加",
+    "description": "抽 1 张牌。使追击攻击时，目标使用格挡抵消的伤害量转化为自身等量的格挡。",
+    "tags": ["buff", "debug"],
+    "effects": [{ "type": "debugBlockGain", "turns": 3 }, { "type": "discardHandAndDraw" }]
+},
+    "debug_compat": { "id": "debug_compat", "name": "调试：兼容", "description": "抽 1 张牌。将弃牌堆里的一张随机牌加入手牌。", "tags": ["buff", "debug"], "effects": [{ "type": "discardHandAndDraw" }] },
+    "debug_call": { "id": "debug_call", "name": "调试：调用", "description": "抽 1 张牌。打出时将所有的调试增益复制到「管理权限」上，然后将之赋予给队列中剩余的普通攻击牌。", "tags": ["buff", "debug"], "effects": [{ "type": "debugCall" }, { "type": "discardHandAndDraw" }] },
+
+    "spell_lianxie": {
+        "id": "spell_lianxie", "name": "术法：连携",
+        "description": "造成 4 点伤害。本回合你每打出过一张带有special属性的牌，伤害 +3。",
         "tags": ["attack"],
-        "effects": [{ "type": "damage", "value": 6 }]
-    },
-    "defend": {
-        "id": "defend",
-        "name": "防御",
-        "description": "获得 5 点格挡。",
-        "tags": ["buff"],
-        "effects": [{ "type": "block", "value": 5 }]
-    },
-    "strike_one": {
-        "id": "strike_one",
-        "name": "连击",
-        "description": "造成 5 点伤害，1 连击。",
-        "tags": ["attack", "combo"],
-        "effects": [{ "type": "damage", "value": 5, "times": 1 }]
-    },
-    "strike_two": {
-        "id": "strike_two",
-        "name": "二连击",
-        "description": "造成 4 点伤害，2 连击。",
-        "tags": ["attack", "combo"],
-        "effects": [{ "type": "damage", "value": 4, "times": 2 }]
-    },
-    "strike_blood": {
-        "id": "strike_blood",
-        "name": "反攻",
-        "description": "造成 5+40%已损体力值 点伤害。",
-        "tags": ["attack"],
-        "effects": [{ "type": "lostHpDamage", "flat": 5, "lostHpPercent": 0.4 }]
-    },
-    "snowball": {
-        "id": "snowball",
-        "name": "渐强",
-        "description": "结算时，令行动序列中当时剩余的每张牌数值 +1。",
-        "tags": ["buff"],
-        "effects": [{ "type": "snowball" }]
-    },
-    "chase_sharp": {
-        "id": "chase_sharp",
-        "name": "追击·锋利",
-        "description": "使追击每次攻击额外造成 2 点伤害。",
-        "tags": ["buff", "chase"],
-        "effects": [{ "type": "buffSpecialAttack", "perAttackDelta": 2 }]
-    },
-    "chase_pierce": {
-        "id": "chase_pierce",
-        "name": "追击·刻骨",
-        "description": "使追击至少造成 1 点真实伤害。",
-        "tags": ["buff", "chase"],
-        "effects": [{ "type": "buffSpecialAttack", "minDamageSet": 1 }]
-    },
-    "chase_density": {
-        "id": "chase_density",
-        "name": "追击·密度",
-        "description": "使追击额外计入 2 次攻击。",
-        "tags": ["buff", "chase"],
-        "effects": [{ "type": "buffSpecialAttack", "bonusAttacksDelta": 2 }]
-    },
-    "echo": {
-        "id": "echo",
-        "name": "余音",
-        "description": "造成 5 点伤害。若此牌在开始行动时位于队列第 1 位，在队列末尾插入一张「余音·残响」。",
-        "tags": ["attack"],
-        "effects": [
-            { "type": "damage", "value": 5 },
-            { "type": "insertCopyAtEnd", "requirePosition": 1 }
-        ]
-    },
-    "chant": {
-        "id": "chant",
-        "name": "吟诵",
-        "description": "移除队列中剩下的所有牌。每移除一张攻击牌，获得 2 点攻击（持续 2 回合）；每移除一张增益牌，获得 3 点格挡。下回合开始行动时，在队尾插入一张「吟诵攻击」。",
-        "tags": ["buff"],
-        "effects": [{ "type": "chantClear" }]
-    },
-    "cycle": {
-        "id": "cycle",
-        "name": "轮回",
-        "description": "弃置所有手牌，然后抽等量的牌。",
-        "tags": ["buff"],
-        "effects": [{ "type": "discardHandAndDraw" }]
-    },
-    "ignite": {
-        "id": "ignite",
-        "name": "引燃",
-        "description": "造成 4 点伤害。若敌人有未激活的词条，可选择激活一条，并额外造成 4 点伤害。",
-        "tags": ["attack"],
-        "effects": [{ "type": "damage", "value": 4 }]
-    },
-    "snow_spike": {
-        "id": "snow_spike",
-        "name": "刺骨",
-        "description": "造成 5 点伤害，本次攻击获得 2 点穿透。",
-        "tags": ["attack"],
-        "effects": [{ "type": "damageWithPierce", "value": 5, "pierce": 2 }]
-    },
-    "cold_wind": {
-        "id": "cold_wind",
-        "name": "冷风",
-        "description": "造成 3 点伤害，使目标获得 2 回合霜冻。",
-        "tags": ["attack"],
-        "effects": [
-            { "type": "damage", "value": 3 },
-            { "type": "applyFrost", "value": 2 }
-        ]
-    },
-    "cold_wave": {
-        "id": "cold_wave",
-        "name": "寒潮",
-        "description": "使目标的霜冻延长 2 回合。",
-        "tags": ["buff"],
-        "effects": [{ "type": "extendFrost", "value": 2 }]
-    },
-    "invasion": {
-        "id": "invasion",
-        "name": "侵袭",
-        "description": "赋予队列中攻击类卡片 降温 。",
-        "tags": ["buff"],
-        "effects": [{ "type": "tagQueueAttacks" }]
-    },
-    "snow_melt": {
-        "id": "snow_melt",
-        "name": "雪融之时",
-        "description": "交换 2。若敌方霜冻持续时间大于 3 回合，改为弃置 2 张手牌并检索 2 张牌。",
-        "tags": ["buff"],
-        "effects": [{ "type": "conditionalExchange", "count": 2, "threshold": 3 }]
-    },
-    "mental_freeze": {
-        "id": "mental_freeze",
-        "name": "思维冷冻",
-        "description": "使目标攻击和格挡降低 2，持续 2 回合；目标每有 1 回合霜冻，额外降低 1。",
-        "tags": ["buff"],
-        "effects": [{ "type": "applyStatDown", "value": 2, "turns": 2, "perFrost": 1 }]
-    },
-    "long_winter_night": {
-        "id": "long_winter_night",
-        "name": "冬夜漫长",
-        "description": "造成 8 点伤害；目标每有 1 回合霜冻，伤害 +3。",
-        "tags": ["attack"],
-        "effects": [{ "type": "damagePerFrost", "base": 8, "perFrost": 3 }]
-    },
-    "glacier_burst": {
-        "id": "glacier_burst",
-        "name": "冰川破裂",
-        "description": "造成 5 点伤害，0 连击；目标每有 1 回合霜冻，此牌连击数 +1。造成伤害后，解除目标的霜冻。",
-        "tags": ["attack"],
-        "effects": [
-            { "type": "damageComboPerFrost", "baseValue": 5, "perFrost": 1, "baseTimes": 0 },
-            { "type": "removeFrost" }
-        ]
-    }
+        "effects": [{ "type": "damageBySpecialCount", "base": 4, "bonusPerSpecial": 3 }]
+                    },
+    "spell_dongcha": { "id": "spell_dongcha", "name": "术法：洞察", "description": "造成 4 点伤害。若目标格挡大于此牌伤害的150%，本次攻击获得2点穿透。", "tags": ["attack"], "effects": [{ "type": "damageWithPierceCondition", "value": 4 }] },
+    "spell_junheng": { "id": "spell_junheng", "name": "术法：均衡", "description": "造成 3 点伤害。此牌的连击数与行动序列中攻击类牌/增益类牌的差值成反比。", "tags": ["attack"], "effects": [{ "type": "damageByBalance" }] },
+    "spell_tiaoxi": { "id": "spell_tiaoxi", "name": "术法：调息", "description": "获得 4 点格挡。若敌人本回合攻击意图总和 ≥ 8，改为回复 8 点生命，溢出量转为格挡。", "tags": ["buff"], "effects": [{ "type": "healOrBlock", "value": 4, "threshold": 8 }] },
+    "spell_gongzhen": { "id": "spell_gongzhen", "name": "术法：共振", "description": "造成 3 点伤害和 3 点格挡。此牌数值受序列中攻击牌和增益牌数量加成。", "tags": ["attack", "buff"], "effects": [{ "type": "damageAndBlockByQueue", "base": 3, "block": 3 }] },
+    "spell_xuji": {
+    "id": "spell_xuji", "name": "术法：蓄积",
+    "description": "弃 1 张牌，获得 1 张「祈愿」，并获得 2 点攻击力提升（持续 2 回合）。",
+    "tags": ["buff"],
+    "effects": [{ "type": "discardOneAndGain" }]
+},
+    "spell_bengfa": { "id": "spell_bengfa", "name": "术法：迸发", "description": "造成 5 点伤害。队列中剩余增益牌越少伤害越高，为 0 时翻倍。", "tags": ["attack"], "effects": [{ "type": "damageByGainCards", "value": 5 }] },
+    "spell_jiya": { "id": "spell_jiya", "name": "术法：积压", "description": "造成 4 点伤害 + 目标已损生命百分比 × (2 + 目标最大生命值 × 0.1)。", "tags": ["attack"], "effects": [{ "type": "damageByLostHp", "base": 4, "flat": 2, "scale": 0.1 }] }
 }

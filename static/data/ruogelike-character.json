@@ -1,126 +1,104 @@
 {
     "W": {
-        "id": "w",
-        "name": "燃血",
+        "id": "w", "name": "（未命名）", "passiveName": "回复脚本的运作",
         "description": "使用攻击类卡牌后，损失20%当前生命值，并回复等同于100%造成体力伤害的生命值。",
         "maxHp": 80,
         "passive": { "type": "lifesteal", "costPercent": 0.2 },
-        "deck": ["strike", "strike", "strike", "strike_one", "strike_one",
-                 "defend", "defend", "defend", "defend",
-                 "strike_two", "strike_blood"]
-    },
-    "L": {
-        "id": "l",
-        "name": "追刃",
-        "description": "开始行动前，在行动序列末尾添加一张「追击」。",
-        "maxHp": 80,
-        "passive": { "type": "appendSpecialAttack", "damagePerAttack": 3 },
-        "deck": ["strike", "strike", "strike", "strike_one", "strike_one",
-                 "defend", "defend", "defend", "defend",
-                 "strike_two", "chase_sharp", "chase_pierce", "chase_density"]
+        "deck": ["strike", "strike", "strike", "strike_one", "strike_one", "defend", "defend", "defend", "defend", "strike_two", "strike_blood"]
     },
     "K": {
-        "id": "Wind",
-        "name": "寻风",
+        "id": "Wind", "name": "（未命名）", "passiveName": "循环脚本的运作",
         "description": "使用带有连击的攻击牌时，连击次数 +1。",
         "maxHp": 80,
         "passive": { "type": "extraDamageRepeat", "value": 1 },
-        "deck": ["strike", "strike", "strike", "strike_one", "strike_one",
-                 "defend", "defend", "defend", "defend",
-                 "strike_two"]
+        "deck": ["strike", "strike", "strike", "strike_one", "strike_one", "defend", "defend", "defend", "defend", "strike_two"]
+    },
+    "L": {
+        "id": "l", "name": "原型机·攻击", "passiveName": "攻击脚本的运作",
+        "description": "开始行动前，在行动序列末尾添加一张「追击」。追击伤害受本回合攻击次数和调试次数的影响。",
+        "maxHp": 80,
+        "passive": { "type": "appendSpecialAttack" },
+        "deck": [
+            "strike", "strike", "strike", "strike", "strike", "strike",
+            "defend", "defend", "defend", "defend", "defend", "defend",
+            "debug_atk", "debug_atk", "debug_atk",
+            "debug_times", "debug_times", "debug_times",
+            "debug_pierce", "debug_pierce", "debug_pierce",
+            "debug_vuln", "debug_vuln",
+            "debug_weak", "debug_weak",
+            "debug_block", "debug_block",
+            "debug_compat", "debug_compat",
+            "debug_call"
+        ]
     },
     "Snowy": {
-        "id": "Snowy",
-        "name": "雪玩偶",
-        "description": "造成伤害时，使目标获得 1 回合 霜冻 。",
+        "id": "Snowy", "name": "雪玩偶", "passiveName": "渐淡希望",
+        "description": "造成伤害时，对目标施加 1 回合「霜冻」。",
         "maxHp": 80,
         "passive": { "type": "applyFrostOnHpDamage", "value": 1 },
         "deck": [
             "strike", "strike", "strike", "strike", "strike", "strike",
             "defend", "defend", "defend", "defend", "defend", "defend",
-            "snow_spike", "snow_spike", "snow_spike", "snow_spike",
+            "ice_spike", "ice_spike", "ice_spike", "ice_spike",
             "cold_wind", "cold_wind", "cold_wind", "cold_wind",
             "cold_wave", "cold_wave", "cold_wave",
             "invasion", "invasion", "invasion",
             "snow_melt", "snow_melt",
             "mental_freeze", "mental_freeze",
-            "long_winter_night",
-            "glacier_burst"
+            "long_winter_night", "glacier_burst"
         ]
     },
     "A": {
-        "id": "A",
-        "name": "梦境",
+        "id": "A", "name": "（未命名）", "passiveName": "梦之补完",
         "description": "行动前，若行动序列未达到最大长度，尽可能地填充「虚构」。",
         "maxHp": 80,
-        "passive": { "type": "insertCard", "card": "fill", "trigger": "beforeResolve",
-                     "count": "fillToLimit", "target": "queue" },
-        "deck": ["strike", "strike", "strike", "strike_one", "strike_one",
-                 "defend", "defend", "defend", "defend",
-                 "strike_two", "snowball", "echo", "chant"]
+        "passive": { "type": "insertCard", "card": "fill", "trigger": "beforeResolve", "count": "fillToLimit", "target": "queue" },
+        "deck": ["strike", "strike", "strike", "strike_one", "strike_one", "defend", "defend", "defend", "defend", "strike_two", "snowball", "echo", "chant"]
     },
     "B": {
-        "id": "B",
-        "name": "思想",
-        "description": "回合开始时的抽牌数 -1，同时生成 1 张「祈愿」。",
+        "id": "B", "name": "直觉派", "passiveName": "或许灵验",
+        "description": "回合开始时的抽牌数 -1，并获得 1 张「祈愿」。",
         "maxHp": 80,
-        "passive": { "type": "insertCard", "card": "choice", "trigger": "turnStart",
-                     "count": 1, "target": "hand", "drawPenalty": 1 },
-        "deck": ["strike", "strike", "strike", "strike_one", "strike_one",
-                 "defend", "defend", "defend", "defend",
-                 "strike_two"]
+        "passive": { "type": "insertCard", "card": "choice", "trigger": "turnStart", "count": 1, "target": "hand", "drawPenalty": 1 },
+        "deck": [
+            "strike", "strike", "strike", "strike", "strike", "strike",
+            "defend", "defend", "defend", "defend", "defend", "defend",
+            "spell_lianxie", "spell_lianxie", "spell_lianxie", "spell_lianxie",
+            "spell_dongcha", "spell_dongcha",
+            "spell_junheng", "spell_junheng", "spell_junheng",
+            "spell_tiaoxi", "spell_tiaoxi",
+            "spell_gongzhen", "spell_gongzhen", "spell_gongzhen",
+            "spell_xuji", "spell_xuji",
+            "spell_bengfa", "spell_bengfa",
+            "spell_jiya", "spell_jiya"
+        ]
     },
     "TheDefencer": {
-        "id": "TheDefencer",
-        "name": "坚韧",
+        "id": "TheDefencer", "name": "自知的古盒", "passiveName": "文物保存措施",
         "description": "回合结束时不失去格挡。",
         "maxHp": 80,
         "passive": { "type": "blockPersist" },
-        "deck": ["strike", "strike", "strike", "strike_one", "strike_one",
-                 "defend", "defend", "defend", "defend",
-                 "strike_two"]
+        "deck": ["strike", "strike", "strike", "strike_one", "strike_one", "defend", "defend", "defend", "defend", "strike_two"]
     },
     "TheTime": {
-        "id": "TheTime",
-        "name": "时光",
+        "id": "TheTime", "name": "（未命名）", "passiveName": "（未命名）",
         "description": "回合开始时，将手牌中的「新生」标签转化为「成熟」标签，然后赋予其他卡「新生」标签。",
         "maxHp": 80,
-        "passive": {
-            "type": "matureHand",
-            "newbornMultiplier": 0.5,
-            "matureMultiplier": 2.0
-        },
-        "deck": ["strike", "strike", "strike", "strike_one", "strike_one",
-                 "defend", "defend", "defend", "defend",
-                 "strike_two"]
+        "passive": { "type": "matureHand", "newbornMultiplier": 0.5, "matureMultiplier": 2.0 },
+        "deck": ["strike", "strike", "strike", "strike_one", "strike_one", "defend", "defend", "defend", "defend", "strike_two"]
     },
     "Adventure": {
-        "id": "Adventure",
-        "name": "冒险",
-        "description": "开始行动前弃置所有手牌。每弃置一张攻击牌，本回合所有攻击 +2 伤害；每弃置一张增益牌，获得 3 点格挡。",
+        "id": "Adventure", "name": "炼金术士", "passiveName": "今天炼点什么？",
+        "description": "回合开始时抽牌至上限。开始行动前弃置所有手牌。",
         "maxHp": 80,
-        "passive": {
-            "type": "adventure",
-            "attackBonusPerCard": 2,
-            "blockPerCard": 3
-        },
-        "deck": ["strike", "strike", "strike", "strike_one", "strike_one",
-                 "defend", "defend", "defend", "defend",
-                 "strike_two"]
+        "passive": { "type": "adventure", "attackBonusPerCard": 2, "blockPerCard": 3, "drawBonus": 4 },
+        "deck": ["strike", "strike", "strike", "strike_one", "strike_one", "defend", "defend", "defend", "defend", "strike_two"]
     },
     "Fundament": {
-        "id": "Fundament",
-        "name": "协同",
+        "id": "Fundament", "name": "守山人", "passiveName": "成为森林",
         "description": "抽牌数 +1，手牌上限 +2，行动序列最大长度 +1。",
         "maxHp": 80,
-        "passive": {
-            "type": "resources",
-            "drawBonus": 1,
-            "handLimitBonus": 2,
-            "queueLimitBonus": 1
-        },
-        "deck": ["strike", "strike", "strike", "strike_one", "strike_one",
-                 "defend", "defend", "defend", "defend",
-                 "strike_two"]
+        "passive": { "type": "resources", "drawBonus": 1, "handLimitBonus": 2, "queueLimitBonus": 1 },
+        "deck": ["strike", "strike", "strike", "strike_one", "strike_one", "defend", "defend", "defend", "defend", "strike_two"]
     }
 }

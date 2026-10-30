@@ -1,0 +1,69 @@
+{
+    "status": {
+        "buffExpired": "[持续状态] 部分增益到期。"
+    },
+    "frost": {
+        "apply": "施加 ${amount} 回合霜冻。",
+        "refresh": "霜冻刷新为 ${amount} 回合。",
+        "already": "霜冻已有 ${turnsLeft} 回合，不生效。",
+        "cannotExtend": "目标没有霜冻，无法延长。",
+        "extend": "霜冻延长 ${amount} 回合（现在 ${turnsLeft} 回合）。"
+    },
+    "passive": {
+        "insertCard": "[${name}] 追加 ${inserted} 张特殊牌。",
+        "appendChase": "[${name}] 追加「追击」。",
+        "queueLimitDown": "[${name}] 敌人下回合行动上限 -${value}。",
+        "chantAttack": "「吟诵攻击」被插入队列末尾。"
+    },
+    "battle": {
+        "playCard": "你使用了「${name}」。",
+        "unknownEffect": "未知效果：${type}",
+        "queueFull": "行动序列已满，无法打出。",
+        "lifesteal": "[${name}] 消耗 ${cost} HP，回复 ${heal} HP。",
+        "playerDead": "你倒下了。",
+        "enemyDead": "敌人倒下了。",
+        "enemyAttack": "敌人攻击，造成 ${real} 点伤害（格挡 ${absorbed}）。",
+        "enemyBlock": "敌人获得 ${val} 点格挡。"
+    },
+    "cards": {
+        "damage": "造成 ${baseDmg} × ${times} 段（真实 ${totalReal}）。",
+        "damageByPierce": "造成 ${total} 点伤害（穿透 ${p}）。",
+        "damageByLostHp": "积压：造成 ${dmg} 点伤害（基础 ${base} + 加成 ${bonus}）。",
+        "damageByBalance": "均衡：差值 ${diff}，连击 ${times}，真实 ${total}。",
+        "damageByGainCards": "迸发：剩余增益 ${buffs}，造成 ${real} 点伤害。",
+        "block": "获得 ${v} 点格挡。",
+        "applyStatDown": "属性降低 -${val}。",
+        "healOrBlock_heal": "调息：触发回复 ${heal} 血，溢出 ${over} 盾。",
+        "healOrBlock_block": "调息：获得 ${value} 盾。",
+        "snowball": "渐强：给剩余牌数值 +1。",
+        "insertCopy": "留下残响。",
+        "tagQueue": "侵袭：赋予队列攻击牌标签。"
+    },
+    "debug": {
+        "power": "调试：系数提升。",
+        "times": "调试：追击段数 +${value}。",
+        "pierce": "调试：追击穿透 +${value}。",
+        "vuln": "调试：追击附带易伤。",
+        "weak": "调试：追击附带属性削弱 -${val}（${turns} 回合）。",
+        "blockGain": "调试：追击附带格挡转化。",
+        "call": "调试调用：赋予 ${count} 张攻击牌管理权限。",
+        "buffUpdate": "追击参数更新。",
+        "draw": "抽 1 张牌。"
+    },
+    "special": {
+        "specialDamage_hit": "追击：造成 ${base}×${times} 段（真实 ${totalReal}）。",
+        "specialDamage_statDown": "追击附带属性削弱 -${val}。",
+        "specialDamage_blockGain": "调试：将 ${absorbed} 点被格挡伤害转化为格挡。",
+        "damageBySpecialCount": "连携：造成 ${dmg} 点伤害（基础 ${base} + 特化 ${bonus}）。",
+        "insight": "洞察：${isPierce}，造成 ${real} 点伤害。",
+        "resonance": "共振：造成 ${real} 伤，获得 ${blk} 格挡。",
+        "xuji": "蓄积：弃 1 张牌，获得「祈愿」，攻击 +2（2 回合）。",
+        "lostHpDamage": "反攻：造成 ${dmg} 点伤害（基础 ${base} + 已损 ${bonus}）。",
+        "chantClear": "吟诵：移除 ${atk} 张攻击、${buff} 张增益；攻击 +${atkBonus}（2 回合）、格挡 +${blockGain}。",
+        "exchange_frost": "雪融之时：霜冻 ${frost} > ${threshold}，弃 2 检索 2。",
+        "exchange_normal": "雪融之时：交换 ${count}。",
+        "damagePerFrost": "冬夜漫长：造成 ${dmg} 点伤害（基础 ${base} + 霜冻 ${frostAdd}）。",
+        "damageComboPerFrost": "冰川破裂：造成 ${base} × ${times} 段（真实 ${totalReal}）。",
+        "activateTrait": "激活敌方词条「${name}」。"
+    }
+}

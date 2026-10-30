@@ -39,7 +39,7 @@
         "term": "霜冻",
         "pinyin": "shuangdong",
         "abbr": "sd",
-        "def": "敌人下回合行动上限 -1，效果不叠加。"
+        "def": "敌人下回合行动上限 -1，同名效果不叠加，同类效果取最高。"
     },
     {
         "term": "位次",
@@ -58,5 +58,15 @@
         "pinyin": "chuantou",
         "abbr": "ct",
         "def": "无视格挡直接造成伤害的数值。"
-    }
+    },
+    { 
+        "term": "调试", 
+        "pinyin": "tiaoshi", 
+        "abbr": "ts", 
+        "def": "带有此标签的牌可以被「调试：调用」复制效果。" },
+    {   
+        "term": "管理权限", 
+        "pinyin": "guanliquanxian", 
+        "abbr": "glqx", 
+        "def": "此标签使牌获得 此标签所附带的增益。" }
 ]

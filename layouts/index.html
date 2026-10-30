@@ -70,19 +70,6 @@
         </div>
 
         <style>
-             /* ===== 字体方案 ===== */
-            body.font-default {
-                font-family: system-ui, -apple-system, "Microsoft YaHei", "微软雅黑", sans-serif;
-            }
-            body.font-serif {
-                font-family: Georgia, "Songti SC", "SimSun", "宋体", serif;
-            }
-            body.font-kai {
-                font-family: "Kaiti SC", "KaiTi", "楷体", serif;
-            }
-            body.font-round {
-                font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-            }
             /* ===== 颜色变量（亮色） ===== */
             :root {
                 --card-bg: #fafafa;
@@ -434,6 +421,8 @@
                 text-align: center;
                 color: #333;
                 line-height: 1.3;
+                overflow: hidden;
+                word-break: break-all;
             }
             #oracle-result {
                 opacity: 0;
@@ -485,6 +474,11 @@
                 flex-direction: column;
                 justify-content: center;
                 min-height: 180px;
+                cursor: pointer;
+                transition: border-color 0.3s, box-shadow 0.3s;
+            }
+            #character-card:hover {
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
             }
             #card-title {
                 font-size: 1.1em;
@@ -675,12 +669,12 @@
 
         <!-- 并排功能区 -->
         <div id="feature-row">
-            <div id="oracle-section">
+            <div id="oracle-section" role="button" tabindex="0">
                 <h2 id="oracle-title">未知的命运</h2>
                 <p id="oracle-desc">选择你观测的视角。</p>
             </div>
 
-            <div id="random-card">
+            <div id="random-card" role="button" tabindex="0">
                 <h2 id="random-title">遵从骰子之意</h2>
                 <div id="random-number">--</div>
                 <p id="random-desc">取一个随机的数字。</p>
@@ -691,14 +685,14 @@
                 <div id="links-wall"></div>
             </div>
 
-            <div id="character-card">
+            <div id="character-card" role="button" tabindex="0">
                 <h2 id="card-title">抽取特性！</h2>
                 <div id="card-name">加载中……</div>
                 <div id="card-skill"></div>
             </div>
         </div>
 
-        <div id="oracle-modal">
+        <div id="oracle-modal" role="dialog" aria-modal="true" aria-labelledby="oracle-hint">
             <div id="oracle-panel">
                 <p id="oracle-hint">选择你观测的视角。</p>
                 <div id="oracle-cards"></div>
@@ -710,7 +704,7 @@
             </div>
         </div>
 
-        <div id="random-modal">
+        <div id="random-modal" role="dialog" aria-modal="true" aria-labelledby="random-panel-title">
             <div id="random-panel">
                 <h3 id="random-panel-title">骰子的意愿</h3>
                 <div class="random-inputs">
@@ -748,6 +742,20 @@
                 return div.innerHTML;
             }
 
+            function lockScroll(lock) {
+                document.body.style.overflow = lock ? 'hidden' : '';
+            }
+
+            function bindActivate(el, fn) {
+                if (!el) return;
+                el.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        fn();
+                    }
+                });
+            }
+
             /* ===== 标签筛选 ===== */
             document.addEventListener('click', function(e) {
                 const btn = e.target.closest('.tag-btn, .tag-link');
@@ -766,6 +774,14 @@
                     }
                 });
 
+                document.querySelectorAll('#posts-list section').forEach(sec => {
+                    const anyVisible = Array.prototype.some.call(
+                        sec.querySelectorAll('.posts-line'),
+                        line => line.style.display !== 'none'
+                    );
+                    sec.style.display = anyVisible ? '' : 'none';
+                });
+
                 document.querySelectorAll('.tag-btn').forEach(b => b.classList.remove('active'));
                 if (btn.classList.contains('tag-btn')) {
                     btn.classList.add('active');
@@ -779,7 +795,7 @@
 
             fetch('/data/oracle.json')
                 .then(res => res.json())
-                .then(data => { oracleItems = data; })
+                .then(data => { oracleItems = Array.isArray(data) ? data : []; })
                 .catch(err => console.error('迷茫的未来。', err));
 
             const oracleModal = document.getElementById('oracle-modal');
@@ -809,6 +825,7 @@
             function openOracle() {
                 randomizeStars();
                 if (oracleItems.length === 0) return;
+                lockScroll(true);
 
                 oracleResult.classList.remove('show');
                 oracleResultLevel.textContent = '';
@@ -820,6 +837,8 @@
                 for (let i = 0; i < 5; i++) {
                     const card = document.createElement('div');
                     card.className = 'oracle-card';
+                    card.setAttribute('role', 'button');
+                    card.setAttribute('tabindex', '0');
                     card.innerHTML = `
                         <div class="oracle-card-inner">
                             <div class="oracle-card-back"></div>
@@ -827,6 +846,7 @@
                         </div>
                     `;
                     card.addEventListener('click', () => pickCard(card));
+                    bindActivate(card, () => pickCard(card));
                     oracleCardsEl.appendChild(card);
                 }
 
@@ -849,8 +869,12 @@
                     if (c !== card) c.classList.add('dimmed');
                 });
 
-                setTimeout(() => { card.classList.add('flipped'); }, 400);
                 setTimeout(() => {
+                    if (!card.isConnected) return;
+                    card.classList.add('flipped');
+                }, 400);
+                setTimeout(() => {
+                    if (!card.isConnected) return;
                     oracleHint.style.display = 'none';
                     oracleResultLevel.textContent = item.name || '';
                     oracleResultText.textContent = item.text;
@@ -860,9 +884,11 @@
 
             function closeOracle() {
                 oracleModal.classList.remove('active');
+                lockScroll(false);
             }
 
             oracleSection.addEventListener('click', openOracle);
+            bindActivate(oracleSection, openOracle);
             document.getElementById('oracle-close').addEventListener('click', closeOracle);
 
             oracleModal.addEventListener('click', (e) => {
@@ -878,9 +904,11 @@
             function openRandom() {
                 randomResult.textContent = '--';
                 randomModal.classList.add('active');
+                lockScroll(true);
             }
             function closeRandom() {
                 randomModal.classList.remove('active');
+                lockScroll(false);
             }
             function generateRandom() {
                 let min = parseInt(randomMinInput.value, 10);
@@ -901,11 +929,19 @@
             }
 
             document.getElementById('random-card')?.addEventListener('click', openRandom);
+            bindActivate(document.getElementById('random-card'), openRandom);
             document.getElementById('random-generate')?.addEventListener('click', generateRandom);
             document.getElementById('random-close')?.addEventListener('click', closeRandom);
 
             randomModal?.addEventListener('click', (e) => {
                 if (e.target === randomModal) closeRandom();
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    if (oracleModal.classList.contains('active')) closeOracle();
+                    if (randomModal.classList.contains('active')) closeRandom();
+                }
             });
 
             /* ===== 角色卡片 ===== */
@@ -914,7 +950,7 @@
             fetch('/data/tags.json')
                 .then(res => res.json())
                 .then(data => {
-                    characterData = data;
+                    characterData = Array.isArray(data) ? data : [];
                     showRandomCard();
                 })
                 .catch(err => console.error('加载失败', err));
@@ -929,15 +965,21 @@
                 if (skillEl) skillEl.textContent = item.tag;
             }
 
+            const characterCard = document.getElementById('character-card');
+            if (characterCard) {
+                characterCard.addEventListener('click', showRandomCard);
+                bindActivate(characterCard, showRandomCard);
+            }
+
             /* ===== 友情链接 ===== */
             fetch('/data/links.json')
                 .then(res => res.json())
                 .then(data => {
                     const wall = document.getElementById('links-wall');
-                    if (!wall) return;
+                    if (!wall || !Array.isArray(data)) return;
                     wall.innerHTML = data.map(link => `
-                        <a href="${link.url}" target="_blank" rel="noopener" title="${escapeHtml(link.name)}">
-                            <img src="${link.banner}" alt="${escapeHtml(link.name)}">
+                        <a href="${escapeHtml(link.url)}" target="_blank" rel="noopener" title="${escapeHtml(link.name)}">
+                            <img src="${escapeHtml(link.banner)}" alt="${escapeHtml(link.name)}">
                         </a>
                     `).join('');
                 })

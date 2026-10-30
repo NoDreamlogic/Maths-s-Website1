@@ -1,10 +1,10 @@
-<button id="drawer-toggle" title="菜单">☰</button>
+<button id="drawer-toggle" title="菜单" aria-label="打开菜单" aria-expanded="false" aria-controls="drawer">☰</button>
 <div id="drawer-mask"></div>
 
-<aside id="drawer">
+<aside id="drawer" role="dialog" aria-modal="true" aria-label="导航">
     <div class="drawer-header">
         <h2>导航</h2>
-        <button id="drawer-close" title="关闭">×</button>
+        <button id="drawer-close" title="关闭" aria-label="关闭菜单">×</button>
     </div>
 
     <nav class="drawer-nav">
@@ -133,6 +133,7 @@
         right: 0;
         top: 0;
         height: 100vh;
+        height: 100dvh;
         width: 300px;
         max-width: 85vw;
         background: var(--drawer-bg, #fff);
@@ -266,9 +267,11 @@
         white-space: nowrap;
         transition: all 0.2s;
     }
-    #music-list li:hover {
+    #music-list li:hover,
+    #music-list li:focus {
         color: var(--text-primary, #222);
         background: var(--card-bg, #fafafa);
+        outline: none;
     }
     #music-list li.active {
         color: var(--text-primary, #222);
@@ -284,9 +287,17 @@
         return div.innerHTML;
     }
 
-        /* ===== 字体切换 ===== */
+    function safeGet(k) {
+        try { return localStorage.getItem(k); } catch (e) { return null; }
+    }
+    function safeSet(k, v) {
+        try { localStorage.setItem(k, v); } catch (e) {}
+    }
+
+    /* ===== 字体切换 ===== */
     const FONT_KEY = 'site-font';
     const DEFAULT_FONT = 'font-default';
+    const ALLOWED_FONTS = ['font-default', 'font-serif', 'font-kai', 'font-round', 'font-custom'];
 
     function applyFont(fontClass) {
         document.body.classList.remove(
@@ -298,14 +309,16 @@
     }
 
     function initFont() {
-        const saved = localStorage.getItem(FONT_KEY) || DEFAULT_FONT;
+        const stored = safeGet(FONT_KEY);
+        const saved = ALLOWED_FONTS.includes(stored) ? stored : DEFAULT_FONT;
         applyFont(saved);
 
         const sel = document.getElementById('font-select');
         if (sel) {
             sel.addEventListener('change', () => {
                 const f = sel.value;
-                localStorage.setItem(FONT_KEY, f);
+                if (!ALLOWED_FONTS.includes(f)) return;
+                safeSet(FONT_KEY, f);
                 applyFont(f);
             });
         }
@@ -321,17 +334,25 @@
 
     if (!drawer || !drawerToggle) return;
 
-    drawerToggle.addEventListener('click', () => {
+    function openDrawer() {
         drawer.classList.add('active');
         drawerMask.classList.add('active');
-    });
-    drawerClose.addEventListener('click', () => {
+        drawerToggle.setAttribute('aria-expanded', 'true');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeDrawer() {
         drawer.classList.remove('active');
         drawerMask.classList.remove('active');
-    });
-    drawerMask.addEventListener('click', () => {
-        drawer.classList.remove('active');
-        drawerMask.classList.remove('active');
+        drawerToggle.setAttribute('aria-expanded', 'false');
+        document.body.style.overflow = '';
+    }
+
+    drawerToggle.addEventListener('click', openDrawer);
+    drawerClose.addEventListener('click', closeDrawer);
+    drawerMask.addEventListener('click', closeDrawer);
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && drawer.classList.contains('active')) closeDrawer();
     });
 
     /* ===== 音乐盒 ===== */
@@ -348,7 +369,7 @@
     fetch('/data/music.json')
         .then(res => res.json())
         .then(data => {
-            musicData = data || [];
+            musicData = Array.isArray(data) ? data : [];
             renderMusicList();
         })
         .catch(err => console.error('音乐列表加载失败', err));
@@ -356,11 +377,13 @@
     function renderMusicList() {
         if (!musicList) return;
         musicList.innerHTML = musicData.map((m, i) =>
-            `<li data-index="${i}">${escapeHtml(m.title)}</li>`
+            `<li data-index="${i}" tabindex="0">${escapeHtml(m.title)}</li>`
         ).join('');
         musicList.querySelectorAll('li').forEach(li => {
-            li.addEventListener('click', () => {
-                playIndex(parseInt(li.dataset.index, 10));
+            const play = () => playIndex(parseInt(li.dataset.index, 10));
+            li.addEventListener('click', play);
+            li.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); play(); }
             });
         });
     }
@@ -382,7 +405,11 @@
     }
 
     musicPlay.addEventListener('click', () => {
-        if (currentIndex === -1 && musicData.length > 0) {
+        if (musicData.length === 0) {
+            musicTitle.textContent = '曲目加载中…';
+            return;
+        }
+        if (currentIndex === -1) {
             playIndex(0);
             return;
         }
