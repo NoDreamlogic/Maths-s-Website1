@@ -1,0 +1,502 @@
+{{- /*
+  视觉小说式对话阅读器。
+
+  用法（文章 front matter）：
+    dialogue = true
+    dialogueBg = "/images/bg.png"   # 可选，舞台背景图
+
+  正文约定：
+    角色名：台词      → 角色台词（左侧名字牌 + 正文）
+    旁白：……          → 旁白（不显示名字牌）
+    普通段落          → 旁白
+    ## 小标题         → 居中标题卡
+    > 引用            → 旁白（引用样式）
+    ---               → 场景分隔（⁂）
+    ![图](src)        → 整屏插图
+
+  在没有 JS 的情况下自动退化为「纯文字全文」。
+*/ -}}
+{{- $bg := .Params.dialogueBg -}}
+<div class="vn" data-vn>
+  <div class="vn-stage" tabindex="0" role="group" aria-label="对话阅读区：点击画面或按空格键显示下一句">
+    {{ with $bg }}<div class="vn-scene" style="background-image:url('{{ . | relURL }}')" aria-hidden="true"></div>{{ end }}
+    <div class="vn-title-card" hidden></div>
+    <img class="vn-image" alt="" hidden>
+    <div class="vn-box">
+      <div class="vn-name" hidden></div>
+      <div class="vn-line" aria-live="polite"></div>
+      <div class="vn-foot">
+        <span class="vn-progress"></span>
+        <span class="vn-next">点击继续 ▾</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="vn-controls">
+    <button type="button" class="vn-btn" data-vn-prev>上一句</button>
+    <button type="button" class="vn-btn" data-vn-next>下一句</button>
+    <button type="button" class="vn-btn" data-vn-restart>从头开始</button>
+  </div>
+
+  <details class="vn-fulltext" open>
+    <summary>以纯文字阅读全文</summary>
+    <div class="vn-source post-content markdown-body">
+      {{ .Content }}
+    </div>
+  </details>
+
+  <noscript>
+    <style>
+      .vn-stage, .vn-controls { display: none !important; }
+    </style>
+  </noscript>
+</div>
+
+<style>
+  .vn {
+    --vn-fg: #f3f1ec;
+    margin: 26px 0 8px;
+  }
+
+  .vn [hidden] {
+    display: none !important;
+  }
+
+  .vn-stage {
+    position: relative;
+    height: clamp(380px, 52vh, 500px);
+    border-radius: 16px;
+    overflow: hidden;
+    background:
+      radial-gradient(110% 80% at 50% -10%, rgba(122, 142, 224, 0.36), transparent 60%),
+      radial-gradient(80% 60% at 85% 105%, rgba(214, 138, 110, 0.18), transparent 65%),
+      linear-gradient(180deg, #1b1e2c 0%, #14151c 55%, #0e0f14 100%);
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.22), inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .vn-stage:focus-visible {
+    outline: 2px solid var(--link-color);
+    outline-offset: 4px;
+  }
+
+  .vn-scene {
+    position: absolute;
+    inset: 0;
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    opacity: 0.5;
+  }
+
+  .vn-scene::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(10, 11, 16, 0.35), rgba(10, 11, 16, 0.6) 55%, rgba(10, 11, 16, 0.88));
+  }
+
+  .vn-title-card {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    text-align: center;
+    color: #f7f2e6;
+    font-size: clamp(1.25em, 3.2vw, 1.75em);
+    letter-spacing: 0.14em;
+    line-height: 1.7;
+    text-shadow: 0 2px 18px rgba(0, 0, 0, 0.6);
+  }
+
+  .vn-title-card::before,
+  .vn-title-card::after {
+    content: "❖";
+    display: block;
+    font-size: 0.5em;
+    opacity: 0.5;
+    letter-spacing: 0;
+    margin: 0 0 14px;
+  }
+
+  .vn-title-card::after {
+    margin: 14px 0 0;
+  }
+
+  .vn-image {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    max-width: 92%;
+    max-height: 80%;
+    object-fit: contain;
+    border-radius: 8px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+  }
+
+  .vn-box {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    min-height: 176px;
+    padding: 18px 26px 14px;
+    color: var(--vn-fg);
+    background: linear-gradient(180deg, rgba(8, 9, 14, 0) 0%, rgba(8, 9, 14, 0.74) 26%, rgba(8, 9, 14, 0.93) 100%);
+    transition: opacity 0.25s ease;
+  }
+
+  .vn-stage.is-silent .vn-box {
+    opacity: 0;
+  }
+
+  .vn-name {
+    align-self: flex-start;
+    margin-bottom: 10px;
+    padding: 3px 12px;
+    font-size: 0.9em;
+    letter-spacing: 0.08em;
+    color: #ffe9c4;
+    background: rgba(255, 255, 255, 0.1);
+    border-left: 3px solid #d9b26a;
+    border-radius: 3px;
+  }
+
+  .vn-line {
+    font-size: 1.08em;
+    line-height: 1.95;
+    letter-spacing: 0.02em;
+    word-break: break-word;
+  }
+
+  .vn-line p {
+    margin: 0;
+    text-indent: 0;
+  }
+
+  .vn-line a {
+    color: #9fc3ff;
+    text-decoration: underline;
+  }
+
+  .vn-stage.is-narration .vn-line {
+    color: #cfcbd8;
+  }
+
+  .vn-break {
+    display: block;
+    text-align: center;
+    font-size: 1.4em;
+    letter-spacing: 0.6em;
+    color: #cfcbd8;
+    padding: 40px 0;
+  }
+
+  .vn-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 12px;
+    font-size: 0.78em;
+    letter-spacing: 0.1em;
+    color: rgba(255, 255, 255, 0.42);
+  }
+
+  .vn-next {
+    animation: vn-blink 1.8s ease-in-out infinite;
+  }
+
+  .vn-stage.is-end .vn-next {
+    animation: none;
+    color: rgba(255, 255, 255, 0.55);
+  }
+
+  @keyframes vn-blink {
+    0%, 100% { opacity: 0.35; }
+    50% { opacity: 1; }
+  }
+
+  .vn-in {
+    animation: vn-fade 0.35s ease-out both;
+  }
+
+  @keyframes vn-fade {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: none; }
+  }
+
+  .vn-controls {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 10px;
+  }
+
+  .vn-btn {
+    padding: 4px 14px;
+    font: inherit;
+    font-size: 0.82em;
+    color: var(--secondary-text);
+    background: none;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+  }
+
+  .vn-btn:hover:not(:disabled) {
+    color: var(--text-color);
+    border-color: var(--text-color);
+  }
+
+  .vn-btn:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
+
+  .vn-fulltext {
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--border-color);
+  }
+
+  .vn-fulltext > summary {
+    cursor: pointer;
+    font-size: 0.86em;
+    color: var(--secondary-text);
+    letter-spacing: 0.04em;
+  }
+
+  .vn-fulltext > summary:hover {
+    color: var(--text-color);
+  }
+
+  .vn-fulltext .vn-source {
+    margin-top: 14px;
+  }
+
+  @media (max-width: 700px) {
+    .vn-stage {
+      height: clamp(320px, 46vh, 420px);
+      border-radius: 12px;
+    }
+
+    .vn-box {
+      min-height: 150px;
+      padding: 14px 16px 12px;
+    }
+
+    .vn-line {
+      font-size: 1em;
+      line-height: 1.85;
+    }
+
+    .vn-title-card {
+      padding: 28px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .vn-in, .vn-next {
+      animation: none;
+    }
+
+    .vn-box {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    'use strict';
+
+    var root = document.querySelector('[data-vn]');
+    if (!root) return;
+
+    var stage = root.querySelector('.vn-stage');
+    var src = root.querySelector('.vn-source');
+    var titleCard = root.querySelector('.vn-title-card');
+    var imageEl = root.querySelector('.vn-image');
+    var nameEl = root.querySelector('.vn-name');
+    var lineEl = root.querySelector('.vn-line');
+    var progEl = root.querySelector('.vn-progress');
+    var nextEl = root.querySelector('.vn-next');
+    var prevBtn = root.querySelector('[data-vn-prev]');
+    var nextBtn = root.querySelector('[data-vn-next]');
+    var restartBtn = root.querySelector('[data-vn-restart]');
+    var fulltext = root.querySelector('.vn-fulltext');
+
+    if (!stage || !src) return;
+
+    var NARRATOR = {'旁白': 1, '叙述': 1, ' narrator': 1, 'narrator': 1, '解说': 1};
+    var PALETTE = ['#e8b96a', '#8fb7ff', '#f29bb0', '#9fe0b0', '#c7a6ff', '#f0c48a'];
+
+    function splitSpeaker(el) {
+      var clone = el.cloneNode(true);
+      var walker = document.createTreeWalker(clone, NodeFilter.SHOW_TEXT, null);
+      var first = walker.nextNode();
+      if (!first) return null;
+
+      var m = first.nodeValue.match(/^\s*([^\s：:。！？!?，,、；;“”"'（）()]{1,10})\s*[：:]\s*/);
+      if (!m) return null;
+
+      first.nodeValue = first.nodeValue.slice(m[0].length);
+      var html = clone.innerHTML.trim();
+      if (!html) return null;
+
+      return { name: m[1], html: html };
+    }
+
+    var steps = [];
+    Array.prototype.forEach.call(src.children, function (el) {
+      var tag = el.tagName.toLowerCase();
+
+      if (tag === 'h1' || tag === 'h2' || tag === 'h3') {
+        steps.push({ type: 'title', html: el.innerHTML });
+        return;
+      }
+
+      if (tag === 'hr') {
+        steps.push({ type: 'break' });
+        return;
+      }
+
+      if (tag === 'p') {
+        var img = el.querySelector('img');
+        if (img && !el.textContent.trim()) {
+          steps.push({ type: 'image', src: img.getAttribute('src'), alt: img.getAttribute('alt') || '' });
+          return;
+        }
+
+        var sp = splitSpeaker(el);
+        if (sp) {
+          var isNarration = NARRATOR[sp.name.toLowerCase().trim()] === 1;
+          steps.push(isNarration
+            ? { type: 'narration', html: sp.html }
+            : { type: 'line', name: sp.name, html: sp.html });
+        } else {
+          steps.push({ type: 'narration', html: el.innerHTML });
+        }
+        return;
+      }
+
+      if (tag === 'blockquote') {
+        steps.push({ type: 'narration', html: el.innerHTML });
+        return;
+      }
+
+      if (tag === 'ul' || tag === 'ol') {
+        Array.prototype.forEach.call(el.children, function (li) {
+          steps.push({ type: 'narration', html: li.innerHTML });
+        });
+        return;
+      }
+
+      steps.push({ type: 'narration', html: el.outerHTML });
+    });
+
+    steps = steps.filter(function (s) {
+      return s.type === 'break' || s.type === 'image' || s.type === 'title' || (s.html && s.html.trim());
+    });
+
+    if (!steps.length) return;
+
+    var idx = 0;
+
+    function colorFor(name) {
+      var h = 0;
+      for (var i = 0; i < name.length; i++) {
+        h = (h * 31 + name.charCodeAt(i)) >>> 0;
+      }
+      return PALETTE[h % PALETTE.length];
+    }
+
+    function render() {
+      var s = steps[idx];
+      var silent = s.type === 'title' || s.type === 'break' || s.type === 'image';
+
+      stage.classList.toggle('is-silent', silent);
+      stage.classList.toggle('is-narration', s.type === 'narration');
+      stage.classList.toggle('is-end', idx === steps.length - 1);
+
+      titleCard.hidden = s.type !== 'title';
+      if (s.type === 'title') titleCard.innerHTML = s.html;
+
+      imageEl.hidden = s.type !== 'image';
+      if (s.type === 'image') {
+        imageEl.src = s.src || '';
+        imageEl.alt = s.alt || '';
+      }
+
+      if (s.type === 'line') {
+        nameEl.hidden = false;
+        nameEl.textContent = s.name;
+        nameEl.style.borderLeftColor = colorFor(s.name);
+      } else {
+        nameEl.hidden = true;
+      }
+
+      if (s.type === 'break') {
+        lineEl.innerHTML = '<span class="vn-break">⁂</span>';
+      } else if (!silent) {
+        lineEl.innerHTML = s.html;
+      } else {
+        lineEl.innerHTML = '';
+      }
+
+      if (!silent) {
+        lineEl.classList.remove('vn-in');
+        void lineEl.offsetWidth;
+        lineEl.classList.add('vn-in');
+      }
+
+      progEl.textContent = (idx + 1) + ' / ' + steps.length;
+      nextEl.textContent = idx === steps.length - 1 ? '已是最后一句' : '点击继续 ▾';
+
+      prevBtn.disabled = idx === 0;
+      nextBtn.disabled = idx === steps.length - 1;
+    }
+
+    function go(delta) {
+      var n = Math.min(Math.max(idx + delta, 0), steps.length - 1);
+      if (n === idx) return;
+      idx = n;
+      render();
+    }
+
+    stage.addEventListener('click', function (e) {
+      if (e.target.closest('a')) return;
+      go(1);
+    });
+
+    stage.addEventListener('keydown', function (e) {
+      if (e.key === ' ' || e.key === 'Enter' || e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === 'PageDown') {
+        e.preventDefault();
+        go(1);
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key === 'PageUp' || e.key === 'Backspace') {
+        e.preventDefault();
+        go(-1);
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        idx = 0;
+        render();
+      }
+    });
+
+    nextBtn.addEventListener('click', function () { go(1); });
+    prevBtn.addEventListener('click', function () { go(-1); });
+    restartBtn.addEventListener('click', function () { idx = 0; render(); });
+
+    if (fulltext) fulltext.open = false;
+    root.classList.add('vn-ready');
+    render();
+  })();
+</script>

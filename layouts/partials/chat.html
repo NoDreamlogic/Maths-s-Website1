@@ -1,0 +1,366 @@
+{{- /*
+  QQ 聊天式对话排版（文章用）。
+
+  用法（文章 front matter）：
+    dialogue = true
+    dialogueMe = "林致远"      # 可选：谁说的话靠右显示（主角）
+
+  正文约定：
+    角色名：台词   → 聊天气泡（dialogueMe 指定的人靠右，其他人靠左）
+    旁白：……       → 旁白（不显示气泡）
+    普通段落       → 旁白
+    ## 小标题      → 居中分隔条
+    > 引用         → 旁白
+    ---            → 分隔符
+    ![图](src)     → 图片消息
+*/ -}}
+<div class="chat" data-chat{{ with .Params.dialogueMe }} data-me="{{ . }}"{{ end }}>
+  <div class="chat-list"></div>
+  <div class="chat-source post-content markdown-body">
+    {{ .Content }}
+  </div>
+</div>
+
+<style>
+  .chat {
+    --chat-bg: #f3f4f7;
+    --chat-line: rgba(0, 0, 0, 0.06);
+    --chat-bubble: #ffffff;
+    --chat-bubble-text: var(--text-color);
+    --chat-me-bubble: #2f7cf6;
+    --chat-me-text: #ffffff;
+    --chat-quote-line: rgba(0, 0, 0, 0.12);
+    margin: 26px 0 8px;
+    padding: 22px 20px 26px;
+    font-size: 17px;
+    background: var(--chat-bg);
+    border: 1px solid var(--chat-line);
+    border-radius: 18px;
+    overflow-wrap: anywhere;
+  }
+
+  [data-theme="dark"] .chat {
+    --chat-bg: #1d1e23;
+    --chat-line: rgba(255, 255, 255, 0.07);
+    --chat-bubble: #2a2c33;
+    --chat-me-bubble: #2f6feb;
+    --chat-quote-line: rgba(255, 255, 255, 0.14);
+    border-color: var(--chat-line);
+  }
+
+  .chat.js .chat-source {
+    display: none;
+  }
+
+  .chat-msg {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin: 16px 0;
+  }
+
+  .chat-msg.chat-same {
+    margin-top: 6px;
+  }
+
+  .chat-me {
+    flex-direction: row-reverse;
+  }
+
+  .chat-avatar {
+    flex: 0 0 38px;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.95em;
+    color: #fff;
+    background: var(--c, #7a7a7a);
+    user-select: none;
+  }
+
+  .chat-same .chat-avatar {
+    visibility: hidden;
+  }
+
+  .chat-same .chat-name {
+    display: none;
+  }
+
+  .chat-body {
+    max-width: 76%;
+    min-width: 0;
+  }
+
+  .chat-me .chat-body {
+    text-align: right;
+  }
+
+  .chat-name {
+    margin: 0 0 4px;
+    padding: 0 4px;
+    font-size: 0.78em;
+    color: var(--secondary-text);
+  }
+
+  .chat-bubble {
+    display: inline-block;
+    padding: 10px 14px;
+    text-align: left;
+    line-height: 1.75;
+    color: var(--chat-bubble-text);
+    background: var(--chat-bubble);
+    border-radius: 14px;
+    border-top-left-radius: 4px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  }
+
+  .chat-me .chat-bubble {
+    color: var(--chat-me-text);
+    background: var(--chat-me-bubble);
+    border-top-left-radius: 14px;
+    border-top-right-radius: 4px;
+  }
+
+  .chat-bubble p {
+    margin: 0;
+    text-indent: 0;
+  }
+
+  .chat-bubble a {
+    color: inherit;
+    text-decoration: underline;
+  }
+
+  .chat-bubble img {
+    display: block;
+    max-width: 100%;
+    border-radius: 8px;
+  }
+
+  .chat-image .chat-bubble {
+    padding: 4px;
+  }
+
+  .chat-narration {
+    margin: 18px 0 18px 48px;
+    padding-left: 14px;
+    border-left: 3px solid var(--chat-quote-line);
+    color: var(--secondary-text);
+    font-size: 0.94em;
+    line-height: 1.9;
+  }
+
+  .chat-narration p {
+    margin: 0 0 0.6em;
+    text-indent: 0;
+  }
+
+  .chat-narration p:last-child {
+    margin-bottom: 0;
+  }
+
+  .chat-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 28px 0 18px;
+    font-size: 0.82em;
+    letter-spacing: 0.1em;
+    color: var(--secondary-text);
+  }
+
+  .chat-divider::before,
+  .chat-divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: currentColor;
+    opacity: 0.18;
+  }
+
+  .chat-divider span {
+    white-space: nowrap;
+  }
+
+  @media (max-width: 700px) {
+    .chat {
+      padding: 16px 12px 18px;
+      font-size: 16px;
+      border-radius: 14px;
+    }
+
+    .chat-body {
+      max-width: 82%;
+    }
+
+    .chat-narration {
+      margin-left: 0;
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    'use strict';
+
+    var root = document.querySelector('[data-chat]');
+    if (!root) return;
+
+    var src = root.querySelector('.chat-source');
+    var list = root.querySelector('.chat-list');
+    if (!src || !list) return;
+
+    var me = (root.getAttribute('data-me') || '').trim();
+    var NARRATOR = { '旁白': 1, '叙述': 1, 'narrator': 1, '解说': 1 };
+    var PALETTE = ['#e07a5f', '#3d7ea6', '#6a8f5f', '#a06cd5', '#c48a3f', '#4a7c94', '#b5546a', '#5d6bb0'];
+
+    function colorFor(name) {
+      var h = 0;
+      for (var i = 0; i < name.length; i++) {
+        h = (h * 31 + name.charCodeAt(i)) >>> 0;
+      }
+      return PALETTE[h % PALETTE.length];
+    }
+
+    function splitSpeaker(el) {
+      var clone = el.cloneNode(true);
+      var walker = document.createTreeWalker(clone, NodeFilter.SHOW_TEXT, null);
+      var first = walker.nextNode();
+      if (!first) return null;
+
+      var m = first.nodeValue.match(/^\s*([^\s：:。！？!?，,、；;“”"'（）()]{1,10})\s*[：:]\s*/);
+      if (!m) return null;
+
+      first.nodeValue = first.nodeValue.slice(m[0].length);
+      var html = clone.innerHTML.trim();
+      if (!html) return null;
+
+      return { name: m[1], html: html };
+    }
+
+    function isMe(name) {
+      if (name === '我') return true;
+      return me !== '' && name === me;
+    }
+
+    var frag = document.createDocumentFragment();
+    var lastSpeaker = null;
+
+    function addDivider(html) {
+      var d = document.createElement('div');
+      d.className = 'chat-divider';
+      d.innerHTML = '<span>' + (html || '⁂') + '</span>';
+      frag.appendChild(d);
+    }
+
+    function addNarration(html) {
+      var d = document.createElement('div');
+      d.className = 'chat-narration';
+      d.innerHTML = html;
+      frag.appendChild(d);
+      lastSpeaker = null;
+    }
+
+    function addMessage(name, html) {
+      var mine = isMe(name);
+      var same = lastSpeaker === name;
+      var wrap = document.createElement('div');
+      wrap.className = 'chat-msg ' + (mine ? 'chat-me' : 'chat-them') + (same ? ' chat-same' : '');
+
+      var avatar = document.createElement('div');
+      avatar.className = 'chat-avatar';
+      avatar.textContent = name.slice(0, 1);
+      avatar.style.setProperty('--c', colorFor(name));
+
+      var body = document.createElement('div');
+      body.className = 'chat-body';
+
+      var label = document.createElement('div');
+      label.className = 'chat-name';
+      label.textContent = name;
+
+      var bubble = document.createElement('div');
+      bubble.className = 'chat-bubble';
+      bubble.innerHTML = html;
+
+      body.appendChild(label);
+      body.appendChild(bubble);
+      wrap.appendChild(avatar);
+      wrap.appendChild(body);
+      frag.appendChild(wrap);
+      lastSpeaker = name;
+    }
+
+    function addImage(img) {
+      var wrap = document.createElement('div');
+      wrap.className = 'chat-msg chat-them chat-image';
+      var bubble = document.createElement('div');
+      bubble.className = 'chat-bubble';
+      var el = document.createElement('img');
+      el.src = img.getAttribute('src') || '';
+      el.alt = img.getAttribute('alt') || '';
+      bubble.appendChild(el);
+      wrap.appendChild(bubble);
+      frag.appendChild(wrap);
+      lastSpeaker = null;
+    }
+
+    Array.prototype.forEach.call(src.children, function (el) {
+      var tag = el.tagName.toLowerCase();
+
+      if (tag === 'h1' || tag === 'h2' || tag === 'h3') {
+        addDivider(el.innerHTML);
+        lastSpeaker = null;
+        return;
+      }
+
+      if (tag === 'hr') {
+        addDivider('⁂');
+        return;
+      }
+
+      if (tag === 'p') {
+        var img = el.querySelector('img');
+        if (img && !el.textContent.trim()) {
+          addImage(img);
+          return;
+        }
+
+        var sp = splitSpeaker(el);
+        if (sp) {
+          var name = sp.name.trim();
+          if (NARRATOR[name.toLowerCase()] === 1) {
+            addNarration(sp.html);
+          } else {
+            addMessage(name, sp.html);
+          }
+        } else {
+          addNarration(el.innerHTML);
+        }
+        return;
+      }
+
+      if (tag === 'blockquote') {
+        addNarration(el.innerHTML);
+        return;
+      }
+
+      if (tag === 'ul' || tag === 'ol') {
+        var items = '';
+        Array.prototype.forEach.call(el.children, function (li) {
+          items += '<p>' + li.innerHTML + '</p>';
+        });
+        addNarration(items);
+        return;
+      }
+
+      addNarration(el.outerHTML);
+    });
+
+    list.appendChild(frag);
+    root.classList.add('js');
+  })();
+</script>

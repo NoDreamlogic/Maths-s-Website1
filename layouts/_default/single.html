@@ -40,10 +40,18 @@
           {{ end }}
         </header>
 
+        {{ if .Params.dialogue }}
+          {{ if eq .Params.dialogueStyle "vn" }}
+          {{ partial "dialogue.html" . }}
+          {{ else }}
+          {{ partial "chat.html" . }}
+          {{ end }}
+        {{ else }}
         <div class="post-content markdown-body">
           {{ .Site.Params.postHeaderContent | safeHTML }}
           {{ .Content }}
         </div>
+        {{ end }}
 
         <div class="row middle-xs">
           <div class="col-xs-12">

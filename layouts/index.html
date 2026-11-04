@@ -34,7 +34,7 @@
                         <h2 class="site-date-catalog">{{ .Key }}</h2>
 
                         {{ range .Pages }}
-                        <div class="row posts-line" data-tags="{{ delimit .Params.tags "," }}">
+                        <div class="row posts-line" data-tags="{{ delimit (default (slice) .Params.tags) "," }}">
                             <div class="posts-date col-xs-3 col-sm-2">
                                 <time datetime="{{ .Date.Format "2006-01-02 15:04:05 MST" }}">{{ .Date.Format "Jan 02"}}</time>
                             </div>

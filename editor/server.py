@@ -3,13 +3,16 @@
 Hugo 本地文章编辑器 —— 后端服务（Flask）
 
 用法：
-    cd D:\\MyFun\\World\\NoDreamLogic.com\\my-website\\editor
-    python server.py
+    双击 editor 目录里的「Start.bat」，或
+    cd editor && python server.py
 然后浏览器打开 http://127.0.0.1:5000
 
-也可以直接双击 editor 目录里的「启动编辑器.bat」。
+支持两种文章：
+    普通文章：Markdown 正文
+    对话体  ：front matter 里带 dialogue = true（可再带 dialogueMe = "主角名"）
 """
 
+import os
 import re
 import tomllib
 import unicodedata
@@ -25,7 +28,7 @@ PROJECT_DIR = EDITOR_DIR.parent          # Hugo 项目根目录
 POSTS_DIR = PROJECT_DIR / "content" / "posts"
 
 HOST = "127.0.0.1"
-PORT = 5000
+PORT = int(os.environ.get("EDITOR_PORT", "5000"))
 TIMEZONE = timezone(timedelta(hours=8))  # 北京时间（东八区）
 
 # 允许的文件名：字母/数字/中文开头，之后是字母数字中文和 . _ -
@@ -95,7 +98,18 @@ def parse_post(text: str):
         tags = [tags] if tags else []
     tags = [str(t) for t in tags if str(t).strip()]
 
-    return {"title": title, "date": date, "draft": draft, "tags": tags}, body
+    dialogue = bool(data.get("dialogue", False))
+    dialogue_me = data.get("dialogueMe", "")
+    dialogue_me = str(dialogue_me) if dialogue_me is not None else ""
+
+    return {
+        "title": title,
+        "date": date,
+        "draft": draft,
+        "tags": tags,
+        "dialogue": dialogue,
+        "dialogueMe": dialogue_me,
+    }, body
 
 
 def toml_quote(value) -> str:
@@ -151,9 +165,17 @@ def make_slug(title: str) -> str:
     return text[:60].strip("-")
 
 
+def make_cjk_slug(title: str) -> str:
+    """中文标题也能当文件名：只把 Windows 不允许的字符和空格换成短横线。"""
+    text = str(title or "").strip()
+    text = re.sub(r'[\\/:*?"<>|\s]+', "-", text)
+    text = re.sub(r"-+", "-", text).strip("-")
+    return text[:40].strip("-")
+
+
 def build_filename(title: str, date_iso: str, existing: set) -> str:
-    """生成不重复的文件名，形如 2026-10-06-hello-world.md"""
-    slug = make_slug(title)
+    """生成不重复的文件名，形如 2026-10-06-hello-world.md 或 2026-10-06-第一章.md"""
+    slug = make_slug(title) or make_cjk_slug(title)
     if not slug:
         slug = "post-" + datetime.now(TIMEZONE).strftime("%Y%m%d-%H%M%S")
     day = (date_iso or "")[:10]
@@ -176,9 +198,15 @@ def build_post_text(meta: dict, body: str) -> str:
         "date = " + meta["date"],
         "draft = " + ("true" if meta["draft"] else "false"),
         "tags = [" + ", ".join(toml_quote(t) for t in meta["tags"]) + "]",
-        "+++",
-        "",
     ]
+    if meta.get("dialogue"):
+        lines.append("dialogue = true")
+        me = str(meta.get("dialogueMe") or "").strip()
+        if me:
+            lines.append("dialogueMe = " + toml_quote(me))
+    lines.append("+++")
+    lines.append("")
+
     text = "\n".join(lines)
     body = (body or "").strip()
     if body:
@@ -193,7 +221,23 @@ def payload_to_meta(data: dict) -> dict:
         "date": normalize_date(data.get("date")),
         "draft": bool(data.get("draft", False)),
         "tags": parse_tags(data.get("tags")),
+        "dialogue": bool(data.get("dialogue", False)),
+        "dialogueMe": str(data.get("dialogueMe", "") or "").strip(),
     }
+
+
+def collect_tags() -> list:
+    """收集所有文章里出现过的标签，供编辑器做输入提示。"""
+    tags = set()
+    if POSTS_DIR.is_dir():
+        for path in POSTS_DIR.glob("*.md"):
+            try:
+                text = path.read_text(encoding="utf-8")
+            except (UnicodeDecodeError, OSError):
+                continue
+            meta, _ = parse_post(text)
+            tags.update(meta["tags"])
+    return sorted(tags)
 
 
 # ============================================================ 路由
@@ -201,6 +245,11 @@ def payload_to_meta(data: dict) -> dict:
 @app.get("/")
 def index():
     return render_template("index.html")
+
+
+@app.get("/api/tags")
+def api_tags():
+    return jsonify(collect_tags())
 
 
 @app.get("/api/posts")
@@ -222,6 +271,7 @@ def api_list_posts():
             "date": meta["date"],
             "draft": meta["draft"],
             "tags": meta["tags"],
+            "dialogue": meta["dialogue"],
         })
     items.sort(key=lambda x: (x["date"] or "", x["filename"]), reverse=True)
     return jsonify(items)
@@ -241,6 +291,8 @@ def api_get_post(filename):
         "date": meta["date"],
         "draft": meta["draft"],
         "tags": meta["tags"],
+        "dialogue": meta["dialogue"],
+        "dialogueMe": meta["dialogueMe"],
         "body": body,
     })
 
